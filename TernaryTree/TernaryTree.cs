@@ -1,0 +1,561 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+
+namespace TernaryTree
+{
+    // TODO: Logging?
+    // TODO: Error Handling and Documentation.  Follow Microsoft lead with interfaces.
+    // TODO: Unit tests.
+
+    /// <summary>
+    /// Provides a structure for storing key value pairs.
+    /// Key must be a <code>string</code>.
+    /// Provides fast insert and lookup operations.
+    /// Provides regex matching for keys.
+    /// </summary>
+    public class TernaryTree<V> :
+        IDictionary<string, V>,
+        ICollection<KeyValuePair<string, V>>,
+        IEnumerable<KeyValuePair<string, V>>,
+        IEnumerable
+        // TODO: Non-Generic Interfaces?
+    {
+        #region Fields and Properties
+
+        /// <summary>
+        /// An entry point to the data structure.
+        /// </summary>
+        private Node<V> _head;
+
+        /// <summary>
+        /// Gets the number of keys in the <see cref="TernaryTree"/>.
+        /// </summary>
+        public int Count { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="TernaryTree"/> is
+        /// read-only.
+        /// </summary>
+        public bool IsReadOnly { get { return false; } }
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="TernaryTree"/> has
+        /// a fixed size.
+        /// </summary>
+        public bool IsFixedSize { get { return false; } }
+
+        // TODO: Concurrency
+        /// <summary>
+        /// Gets a value indicating whether access to the <see cref="TernaryTree"/>
+        /// is synchronized (thread safe).
+        /// </summary>
+        public bool IsSynchronized { get { return false; } }
+
+        /// <summary>
+        /// Gets an object that can be used to synchronize access to the
+        /// <see cref="TernaryTree"/>
+        /// </summary>
+        public object SyncRoot { get { return this; } }
+
+        #endregion
+
+        #region Static 'Constructors'
+
+        public static TernaryTree<V> Create(ICollection<string> keySet)
+        {
+            TernaryTree<V> tree = new TernaryTree<V>();
+            foreach (string key in keySet)
+            {
+                tree.Add(key);
+            }
+            return tree;
+        }
+
+        public static TernaryTree<V> Create(ICollection<KeyValuePair<string, V>> keyValueSet)
+        {
+            TernaryTree<V> tree = new TernaryTree<V>();
+            foreach (KeyValuePair<string, V> keyValuePair in keyValueSet)
+            {
+                tree.Add(keyValuePair.Key, keyValuePair.Value);
+            }
+            return tree;
+        }
+
+        public static TernaryTree<V> Create(IDictionary<string, V> keyValueSet)
+        {
+            TernaryTree<V> tree = new TernaryTree<V>();
+            foreach (KeyValuePair<string, V> keyValuePair in keyValueSet)
+            {
+                tree.Add(keyValuePair.Key, keyValuePair.Value);
+            }
+            return tree;
+        }
+
+        #endregion
+
+        #region Indexers
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public V this[string key]
+        {
+            get
+            {
+                TryGetValue(key, out V value);
+                return value;
+            }
+            set
+            {
+                Add(key, value);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        public ICollection<string> this[TernaryTreeSearch<V> pattern]
+        {
+            get
+            {
+                return pattern.Match(_head);
+            }
+        }
+
+        // TODO: Indexer:  this[int]
+        // Could have an IEnumerator on self as a field.
+        // Would also want to keep track of current position as a field.
+        // Next, next, next until you get there; return the value.
+        // If requested int is greater than Count, throw out of range exception.
+        #endregion
+
+        #region Collections and Enumerators
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<string> Keys()
+        {
+            List<string> _keyList = new List<string>();
+            _getBranchKeys(_head, new StringBuilder(), _keyList);
+            return _keyList;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ICollection<V> Values()
+        {
+            List<V> _valueList = new List<V>();
+            _getBranchValues(_head, _valueList);
+            return _valueList;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        public ICollection<string> Match(string pattern)
+        {
+            TernaryTreeSearch<V> search = new TernaryTreeSearch<V>(pattern);
+            return search.Match(_head);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        ICollection<string> IDictionary<string, V>.Keys => Keys();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        ICollection<V> IDictionary<string, V>.Values => Values();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new TernaryTreeEnumerator<V>(_head);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        IEnumerator<KeyValuePair<string, V>> IEnumerable<KeyValuePair<string, V>>.GetEnumerator()
+        {
+            return new TernaryTreeEnumerator<V>(_head);
+        }
+
+        #endregion
+
+        #region Remaining Interface Implimentation
+
+        /// <summary>
+        /// Adds a key-value pair to the <see cref="TernaryTree"/>.
+        /// </summary>
+        /// <param name="key">The key of the element to add.</param>
+        /// <param name="value">The value of the element to add.</param>
+        public void Add(string key, V value)
+        {
+            if (_head == null)
+            {
+                _head = new Node<V> { Value = key[0] };
+            }
+            Node<V> nd = _insertKey(key, 0, _head) ?? throw new ArgumentException(nameof(key));
+            nd.Data = value;
+            Count++;
+        }
+
+        /// <summary>
+        /// Adds a key to the <see cref="TernaryTree"/>.
+        /// </summary>
+        /// <param name="key">The key to add.</param>
+        public void Add(string key)
+        {
+            if (_head == null)
+            {
+                _head = new Node<V> { Value = key[0] };
+            }
+            _ = _insertKey(key, 0, _head) ?? throw new ArgumentException(nameof(key));
+            Count++;
+        }
+
+        /// <summary>
+        /// Adds a key-value pair to the <see cref="TernaryTree"/>.
+        /// </summary>
+        /// <param name="item">A <see cref="KeyValuePair"/> containing a 
+        /// <code>string</code> key and a <code>V</code> value.</param>
+        public void Add(KeyValuePair<string, V> item) => Add(item.Key, item.Value);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void Clear()
+        {
+            _head = new Node<V>();
+            Count = 0;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool Contains(string key)
+        {
+            if (Count == 0)
+            {
+                return false;
+            }
+            Node<V> node = _getFinalNode(key, 0, _head);
+            if (node == null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool Contains(KeyValuePair<string, V> item)
+        {
+            return Contains(item.Key);
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool ContainsKey(string key)
+        {
+            return Contains(key);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="arrayIndex"></param>
+        public void CopyTo(KeyValuePair<string, V>[] array, int arrayIndex)
+        {
+            List<string> keys = new List<string>();
+            _getBranchKeys(_head, new StringBuilder(), keys);
+
+            array = new KeyValuePair<string, V>[Count];
+
+            int pos = 0;
+            foreach (string key in keys)
+            {
+                TryGetValue(key, out V value);
+                KeyValuePair<string, V> kvPair = new KeyValuePair<string, V>(key, value);
+                array[pos++] = kvPair;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool Remove(KeyValuePair<string, V> item)
+        {
+            return Remove(item.Key);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool Remove(string key)
+        {
+            Node<V> node = _getFinalNode(key, 0, _head);
+            if (node == null)
+            {
+                return false;
+            }
+            node.Data = default(V);
+            node.IsFinalNode = false;
+            _pruneDeadBranch(node);
+            Count--;
+            return true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool TryGetValue(string key, out V value)
+        {
+            Node<V> node = _getFinalNode(key, 0, _head);
+            if (node != null)
+            {
+                value = node.Data;
+                return true;
+            }
+            value = default(V);
+            return false;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="pos"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private Node<V> _insertKey(string key, int pos, Node<V> node)
+        {
+            char keyChar = key[pos];
+
+            // Character matches this Node
+            if (keyChar == node.Value)
+            {
+                // This is the last Node for this key
+                if (pos == key.Length - 1)
+                {
+                    if (node.IsFinalNode)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        node.IsFinalNode = true;
+                        return node;
+                    }
+                }
+
+                // There's more key characters to add
+                if (node.Equal == null)
+                {
+                    // TODO: Abstract out Node creation in this method
+                    node.Equal = new Node<V>
+                    {
+                        Value = key[pos + 1],
+                        Parent = node
+                    };
+                }
+                return _insertKey(key, ++pos, node.Equal);
+            }
+            // Character is lower
+            else if (keyChar < node.Value)
+            {
+                if (node.Smaller == null)
+                {
+                    node.Smaller = new Node<V>
+                    {
+                        Value = key[pos],
+                        Parent = node
+                    };
+                }
+                return _insertKey(key, pos, node.Smaller);
+            }
+            // Character is higher
+            else
+            {
+                if (node.Bigger == null)
+                {
+                    node.Bigger = new Node<V>
+                    {
+                        Value = key[pos],
+                        Parent = node
+                    };
+                }
+                return _insertKey(key, pos, node.Bigger);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="pos"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private Node<V> _getFinalNode(string key, int pos, Node<V> node)
+        {
+            char keyChar = key[pos];
+
+            if (keyChar == node.Value)
+            {
+                if (pos == key.Length - 1)
+                {
+                    return node;
+                }
+                else if (node.Equal != null)
+                {
+                    return _getFinalNode(key, ++pos, node.Equal);
+                }
+                else return null;
+            }
+            else if (keyChar < node.Value)
+            {
+                if (node.Smaller != null)
+                {
+                    return _getFinalNode(key, pos, node.Smaller);
+                }
+                else return null;
+            }
+            else if (node.Bigger != null)
+            {
+                return _getFinalNode(key, pos, node.Bigger);
+            }
+            else return null;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="head"></param>
+        /// <param name="keyBuild"></param>
+        /// <param name="keySet"></param>
+        private void _getBranchKeys(Node<V> head, StringBuilder keyBuild, IList<string> keySet)
+        {
+            if (head.Smaller != null)
+            {
+                _getBranchKeys(head.Smaller, new StringBuilder(keyBuild.ToString()), keySet);
+            }
+            StringBuilder oldString = new StringBuilder(keyBuild.ToString());
+            keyBuild.Append(head.Value);
+            if (head.IsFinalNode)
+            {
+                keySet.Add(keyBuild.ToString()); 
+            }
+            if (head.Equal != null)
+            {
+                _getBranchKeys(head.Equal, keyBuild, keySet);
+            }
+            if (head.Bigger != null)
+            {
+                _getBranchKeys(head.Bigger, oldString, keySet);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="valueSet"></param>
+        private void _getBranchValues(Node<V> node, IList<V> valueSet)
+        {
+            if (node.Smaller != null)
+            {
+                _getBranchValues(node.Smaller, valueSet);
+            }
+            if (node.IsFinalNode)
+            {
+                valueSet.Add(node.Data);
+            }
+            if (node.Equal != null)
+            {
+                _getBranchValues(node.Equal, valueSet);
+            }
+            if (node.Bigger != null)
+            {
+                _getBranchValues(node.Bigger, valueSet);
+            }
+        }
+
+        /// <summary>
+        /// Removes a branch of unused <see cref="Node"/>s, starting
+        /// from a leaf and moving up the branch.  Only
+        /// removes <see cref="Node"/>s that have no children.  Stops when
+        /// encountering the first non-removeable <see cref="Node"/>.
+        /// </summary>
+        /// <param name="node">The leaf <see cref="Node"/> to check for removal.</param>
+        private void _pruneDeadBranch(Node<V> node)
+        {
+            if (node.Parent == null)
+            {
+                return;
+            }
+            if (node.Smaller == null && node.Equal == null && node.Bigger == null)
+            {
+                Node<V> next = node.Parent;
+                if (next.Smaller != null && next.Smaller == node)
+                {
+                    next.Smaller = null;
+                }
+                else if (next.Equal != null && next.Equal == node)
+                {
+                    next.Equal = null;
+                }
+                else if (next.Bigger != null && next.Bigger == node)
+                {
+                    next.Bigger = null;
+                }
+                _pruneDeadBranch(next);
+            }
+        }
+
+        #endregion
+    }
+}
