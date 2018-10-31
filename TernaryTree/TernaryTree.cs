@@ -209,28 +209,15 @@ namespace TernaryTree
         /// </summary>
         /// <param name="key">The key of the element to add.</param>
         /// <param name="value">The value of the element to add.</param>
-        public void Add(string key, V value)
+        public void Add(string key, V value = default(V))
         {
+            _ = key ?? throw new ArgumentNullException(nameof(key));
             if (_head == null)
             {
                 _head = new Node<V> { Value = key[0] };
             }
             Node<V> nd = _insertKey(key, 0, _head) ?? throw new ArgumentException(nameof(key));
             nd.Data = value;
-            Count++;
-        }
-
-        /// <summary>
-        /// Adds a key to the <see cref="TernaryTree"/>.
-        /// </summary>
-        /// <param name="key">The key to add.</param>
-        public void Add(string key)
-        {
-            if (_head == null)
-            {
-                _head = new Node<V> { Value = key[0] };
-            }
-            _ = _insertKey(key, 0, _head) ?? throw new ArgumentException(nameof(key));
             Count++;
         }
 
@@ -317,16 +304,6 @@ namespace TernaryTree
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
-        public bool Remove(KeyValuePair<string, V> item)
-        {
-            return Remove(item.Key);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
         public bool Remove(string key)
@@ -341,6 +318,16 @@ namespace TernaryTree
             _pruneDeadBranch(node);
             Count--;
             return true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public bool Remove(KeyValuePair<string, V> item)
+        {
+            return Remove(item.Key);
         }
 
         /// <summary>

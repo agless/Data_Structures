@@ -37,14 +37,14 @@ namespace TernaryTreeTest
         public void Create_From_ICollection_KVPair()
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
-            Assert.That(subject.Count, Is.EqualTo(_keys.Length));
+            Assert.That(subject.Count, Is.EqualTo(_keyValueCollection.Count));
         }
 
         [Test]
         public void Create_From_IDictionary_String_Int()
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueDictionary);
-            Assert.That(subject.Count, Is.EqualTo(_keys.Length));
+            Assert.That(subject.Count, Is.EqualTo(_keyValueDictionary.Count));
         }
 
         #endregion
