@@ -139,10 +139,14 @@ namespace TernaryTree
             // Only if _currentKey goes empty do we declare _isOutOfRange true and return null.
             // This belongs in a while loop.
             _currentKey.Remove(_currentKey.Length - 1, 1);
-            if (node.Bigger != null)
+            do
             {
-                return _findNextKey(node.Bigger);
-            }
+                _currentKey.Remove(_currentKey.Length - 1, 1);
+                if (node.Bigger != null)
+                {
+                    return _findNextKey(node.Bigger);
+                }
+            } while (node.Parent != null);
             _isOutOfRange = true;
             return null;
         }
