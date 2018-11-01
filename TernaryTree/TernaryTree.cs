@@ -134,7 +134,7 @@ namespace TernaryTree
             {
                 if (index >= Count - 1 || index < 0)
                 {
-                    throw new ArgumentException(nameof(index));
+                    throw new IndexOutOfRangeException();
                 }
                 return _getKeyAtIndex(_head, new StringBuilder(), ref index);
             }
@@ -552,7 +552,7 @@ namespace TernaryTree
             // an index that is less than or equal to Count - 1.
             // The public indexer takes care of this.
             // Private callers beware.
-            return string.Empty;
+            throw new ArgumentException(nameof(index));
         }
 
         /// <summary>
