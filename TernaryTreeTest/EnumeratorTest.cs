@@ -7,9 +7,13 @@ namespace TernaryTreeTest
 {
     class EnumeratorTest
     {
-        private readonly IDictionary<string, int> _keyValueDictionary = new Dictionary<string, int>
+        private readonly ICollection<KeyValuePair<string, int>> _keyValueDictionary = new List<KeyValuePair<string, int>>
         {
-            { "zero", 0 }, { "one", 1 }, { "two", 2 }, { "three", 3 }, { "four", 4 }
+            new KeyValuePair<string, int>("zero", 0),
+            new KeyValuePair<string, int>( "one", 1),
+            new KeyValuePair<string, int>( "two", 2),
+            new KeyValuePair<string, int>( "three", 3),
+            new KeyValuePair<string, int>( "four", 4)
         };
 
         [Test]

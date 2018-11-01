@@ -9,7 +9,8 @@ namespace TernaryTree
     {
         private Node<V> _head;
         private Node<V> _currentNode;
-        private StringBuilder _currentKey;
+        private HashSet<Node<V>> _visited = new HashSet<Node<V>>();
+        private StringBuilder _currentKey = new StringBuilder();
         private bool _isInitialized = false;
         private bool _isOutOfRange = false;
 
@@ -17,7 +18,7 @@ namespace TernaryTree
         {
             _head = head ?? throw new ArgumentNullException(nameof(head));
         }
-        
+
         /// <summary>
         /// Returns the value associated with the current key.
         /// </summary>
@@ -26,7 +27,7 @@ namespace TernaryTree
         /// <summary>
         /// Returns a <see cref="KeyValuePair{TKey, TValue}"/> with the current key and value.
         /// </summary>
-        KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current => 
+        KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current =>
             new KeyValuePair<string, V>(_currentKey.ToString(), _currentNode.Data);
 
         /// <summary>
@@ -50,10 +51,12 @@ namespace TernaryTree
                 return false;
             }
 
+            string lastKey = _currentKey.ToString();
+            Node<V> lastNode = _currentNode;
+
             // If we haven't yet initialized
             if (!_isInitialized)
             {
-                _currentKey = new StringBuilder();
                 _findNextKey(_head);
                 if (!_isInitialized)
                 {
@@ -85,6 +88,8 @@ namespace TernaryTree
             if (_isOutOfRange)
             {
                 // If this search has taken us out of range
+                _currentKey = new StringBuilder(lastKey);
+                _currentNode = lastNode;
                 return false;
             }
 
@@ -110,35 +115,25 @@ namespace TernaryTree
         /// <returns></returns>
         private Node<V> _findNextKey(Node<V> node)
         {
-            if (node.Smaller != null)
+            if (node.Smaller != null && !_visited.Contains(node.Smaller)) 
             {
-                Node<V> first = _findNextKey(node.Smaller);
-                if (first != null)
+                return _findNextKey(node.Smaller);
+            }
+            if (!_visited.Contains(node))
+            {
+                _currentKey.Append(node.Value);
+                _visited.Add(node);
+                if (node.IsFinalNode)
                 {
-                    return first;
+                    _isInitialized = true;
+                    _currentNode = node;
+                    return node;
                 }
             }
-            _currentKey.Append(node.Value);
-            if (node.IsFinalNode)
+            if (node.Equal != null && !_visited.Contains(node.Equal))
             {
-                _isInitialized = true;
-                return node;
+                return _findNextKey(node.Equal);
             }
-            if (node.Equal != null)
-            {
-                Node<V> first = _findNextKey(node.Equal);
-                if (first != null)
-                {
-                    return first;
-                }
-            }
-            // TODO: _findNextKey()
-            // Need to continue up the tree, stripping away characters from
-            // current key as appropriate (when _currentKey[_currentKey.Length - 1] == node.Value ?)
-            // and searching down the branch for every node.Bigger that isn't null.
-            // Only if _currentKey goes empty do we declare _isOutOfRange true and return null.
-            // This belongs in a while loop.
-            _currentKey.Remove(_currentKey.Length - 1, 1);
             do
             {
                 _currentKey.Remove(_currentKey.Length - 1, 1);
