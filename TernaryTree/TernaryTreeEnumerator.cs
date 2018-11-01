@@ -9,8 +9,10 @@ namespace TernaryTree
     {
         private Node<V> _head;
         private Node<V> _currentNode;
+        private string _currentKey;
+        private V _currentValue;
         private HashSet<Node<V>> _visited = new HashSet<Node<V>>();
-        private StringBuilder _currentKey = new StringBuilder();
+        private StringBuilder _keyBuilder = new StringBuilder();
         private bool _isInitialized = false;
         private bool _isOutOfRange = false;
 
@@ -28,14 +30,14 @@ namespace TernaryTree
         /// Returns a <see cref="KeyValuePair{TKey, TValue}"/> with the current key and value.
         /// </summary>
         KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current =>
-            new KeyValuePair<string, V>(_currentKey.ToString(), _currentNode.Data);
+            new KeyValuePair<string, V>(_currentKey, _currentValue);
 
         /// <summary>
         /// Does nothing.
         /// </summary>
         /// <remarks>
         /// Microsoft documentation states that this method should be left empty
-        /// if there's nothing to clean up (i.e. no database connections to close).
+        /// if there's nothing to clean up (e.g. no database connections to close).
         /// </remarks>
         public void Dispose() { }
 
@@ -50,9 +52,6 @@ namespace TernaryTree
             {
                 return false;
             }
-
-            string lastKey = _currentKey.ToString();
-            Node<V> lastNode = _currentNode;
 
             // If we haven't yet initialized
             if (!_isInitialized)
@@ -70,30 +69,7 @@ namespace TernaryTree
                 }
             }
 
-            if (_currentNode.Equal != null)
-            {
-                // Find keys that have a prefix including this character
-                _currentNode = _findNextKey(_currentNode.Equal);
-            }
-            else
-            {
-                // Find keys that have the same prefix except a bigger character in this spot
-                _currentKey.Remove(_currentKey.Length - 1, 1);
-                if (_currentNode.Bigger != null)
-                {
-                    _currentNode = _findNextKey(_currentNode.Bigger);
-                }
-            }
-
-            if (_isOutOfRange)
-            {
-                // If this search has taken us out of range
-                _currentKey = new StringBuilder(lastKey);
-                _currentNode = lastNode;
-                return false;
-            }
-
-            return true;
+            return _findNextKey(_currentNode);
         }
 
         /// <summary>
@@ -102,7 +78,7 @@ namespace TernaryTree
         public void Reset()
         {
             _currentNode = null;
-            _currentKey = new StringBuilder();
+            _keyBuilder = new StringBuilder();
             _isInitialized = false;
             _isOutOfRange = false;
         }
@@ -113,7 +89,7 @@ namespace TernaryTree
         /// <param name="node"></param>
         /// <param name="keyBuilder"></param>
         /// <returns></returns>
-        private Node<V> _findNextKey(Node<V> node)
+        private bool _findNextKey(Node<V> node)
         {
             if (node.Smaller != null && !_visited.Contains(node.Smaller)) 
             {
@@ -121,29 +97,43 @@ namespace TernaryTree
             }
             if (!_visited.Contains(node))
             {
-                _currentKey.Append(node.Value);
+                _keyBuilder.Append(node.Value);
                 _visited.Add(node);
                 if (node.IsFinalNode)
                 {
                     _isInitialized = true;
                     _currentNode = node;
-                    return node;
+                    _currentKey = _keyBuilder.ToString();
+                    _currentValue = _currentNode.Data;
+                    return true;
+                }
+                else
+                {
+                    return _findNextKey(node);
                 }
             }
             if (node.Equal != null && !_visited.Contains(node.Equal))
             {
                 return _findNextKey(node.Equal);
             }
-            do
+            while (node.Bigger == null )
             {
-                _currentKey.Remove(_currentKey.Length - 1, 1);
-                if (node.Bigger != null)
+                if (node.Parent == null)
                 {
-                    return _findNextKey(node.Bigger);
+                    break;
                 }
-            } while (node.Parent != null);
+                if (node.Parent.Equal == node) 
+                {
+                    _keyBuilder.Remove(_keyBuilder.Length - 1, 1);
+                }
+                node = node.Parent;
+            }
+            if (node.Bigger != null)
+            {
+                return _findNextKey(node.Bigger);
+            }
             _isOutOfRange = true;
-            return null;
+            return false;
         }
     }
 }
