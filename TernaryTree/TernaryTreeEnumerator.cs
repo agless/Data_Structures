@@ -7,30 +7,35 @@ namespace TernaryTree
 {
     class TernaryTreeEnumerator<V> : IEnumerator<KeyValuePair<string, V>>, IEnumerator
     {
-        private Node<V> _head;
-        private Node<V> _currentNode;
-        private string _currentKey;
-        private V _currentValue;
-        private HashSet<Node<V>> _visited = new HashSet<Node<V>>();
-        private StringBuilder _keyBuilder = new StringBuilder();
-        private bool _isInitialized = false;
-        private bool _isOutOfRange = false;
+        private TernaryTree<V> _tree;
+        private int _pos = -1;
 
-        public TernaryTreeEnumerator(Node<V> head)
+        public TernaryTreeEnumerator(TernaryTree<V> tree)
         {
-            _head = head ?? throw new ArgumentNullException(nameof(head));
+            _tree = tree ?? throw new ArgumentNullException(nameof(tree));
         }
 
         /// <summary>
         /// Returns the value associated with the current key.
         /// </summary>
-        object IEnumerator.Current => _currentNode.Data;
+        object IEnumerator.Current
+        {
+            get
+            {
+                return _currentValue();
+            }
+        }
 
         /// <summary>
         /// Returns a <see cref="KeyValuePair{TKey, TValue}"/> with the current key and value.
         /// </summary>
-        KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current =>
-            new KeyValuePair<string, V>(_currentKey, _currentValue);
+        KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current
+        {
+            get
+            {
+                return _currentValue();
+            }
+        }
 
         /// <summary>
         /// Does nothing.
@@ -47,29 +52,16 @@ namespace TernaryTree
         /// <returns></returns>
         public bool MoveNext()
         {
+            _pos++;
             // If we're already past the end, don't even try
-            if (_isOutOfRange)
+            if (_pos > _tree.Count - 1)
             {
                 return false;
             }
-
-            // If we haven't yet initialized
-            if (!_isInitialized)
+            else
             {
-                _findNextKey(_head);
-                if (!_isInitialized)
-                {
-                    // The tree must be empty
-                    return false;
-                }
-                else
-                {
-                    // A key was found
-                    return true;
-                }
+                return true;
             }
-
-            return _findNextKey(_currentNode);
         }
 
         /// <summary>
@@ -77,63 +69,23 @@ namespace TernaryTree
         /// </summary>
         public void Reset()
         {
-            _currentNode = null;
-            _keyBuilder = new StringBuilder();
-            _isInitialized = false;
-            _isOutOfRange = false;
+            // reset to BEFORE the first index (per Microsoft docs)
+            _pos = -1;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="keyBuilder"></param>
-        /// <returns></returns>
-        private bool _findNextKey(Node<V> node)
+        private KeyValuePair<string, V> _currentValue()
         {
-            if (node.Smaller != null && !_visited.Contains(node.Smaller)) 
+            string key;
+            if (_pos < 0 || _pos > _tree.Count - 1)
             {
-                return _findNextKey(node.Smaller);
+                key = _tree[_pos];
             }
-            if (!_visited.Contains(node))
+            else
             {
-                _keyBuilder.Append(node.Value);
-                _visited.Add(node);
-                if (node.IsFinalNode)
-                {
-                    _isInitialized = true;
-                    _currentNode = node;
-                    _currentKey = _keyBuilder.ToString();
-                    _currentValue = _currentNode.Data;
-                    return true;
-                }
-                else
-                {
-                    return _findNextKey(node);
-                }
+                key = string.Empty;
             }
-            if (node.Equal != null && !_visited.Contains(node.Equal))
-            {
-                return _findNextKey(node.Equal);
-            }
-            while (node.Bigger == null )
-            {
-                if (node.Parent == null)
-                {
-                    break;
-                }
-                if (node.Parent.Equal == node) 
-                {
-                    _keyBuilder.Remove(_keyBuilder.Length - 1, 1);
-                }
-                node = node.Parent;
-            }
-            if (node.Bigger != null)
-            {
-                return _findNextKey(node.Bigger);
-            }
-            _isOutOfRange = true;
-            return false;
+            _tree.TryGetValue(key, out V value);
+            return new KeyValuePair<string, V>(key, value);
         }
     }
 }

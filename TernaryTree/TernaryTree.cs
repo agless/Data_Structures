@@ -128,6 +128,18 @@ namespace TernaryTree
             }
         }
 
+        public string this[int index]
+        {
+            get
+            {
+                if (index >= Count - 1 || index < 0)
+                {
+                    throw new ArgumentException(nameof(index));
+                }
+                return _getKeyAtIndex(_head, new StringBuilder(), ref index);
+            }
+        }
+
         // TODO: Indexer:  this[int]
         // Could have an IEnumerator on self as a field.
         // Would also want to keep track of current position as a field.
@@ -188,7 +200,7 @@ namespace TernaryTree
         /// <returns></returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new TernaryTreeEnumerator<V>(_head);
+            return new TernaryTreeEnumerator<V>(this);
         }
 
         /// <summary>
@@ -197,7 +209,7 @@ namespace TernaryTree
         /// <returns></returns>
         IEnumerator<KeyValuePair<string, V>> IEnumerable<KeyValuePair<string, V>>.GetEnumerator()
         {
-            return new TernaryTreeEnumerator<V>(_head);
+            return new TernaryTreeEnumerator<V>(this);
         }
 
         #endregion
@@ -509,6 +521,38 @@ namespace TernaryTree
             {
                 _getBranchValues(node.Bigger, valueSet);
             }
+        }
+
+        private string _getKeyAtIndex(Node<V> node, StringBuilder keyBuild, ref int index)
+        {
+            if (node.Smaller != null)
+            {
+                _getKeyAtIndex(node.Smaller, keyBuild, ref index);
+            }
+            StringBuilder oldString = new StringBuilder(keyBuild.ToString());
+            keyBuild.Append(node.Value);
+            if (node.IsFinalNode)
+            {
+                index--;
+                if (index < 0)
+                {
+                    return keyBuild.ToString();
+                }
+            }
+            if (node.Equal != null)
+            {
+                _getKeyAtIndex(node.Equal, keyBuild, ref index);
+            }
+            if (node.Bigger != null)
+            {
+                _getKeyAtIndex(node.Bigger, oldString, ref index);
+            }
+
+            // This is unreachable, so long as original caller provides
+            // an index that is less than or equal to Count - 1.
+            // The public indexer takes care of this.
+            // Private callers beware.
+            return string.Empty;
         }
 
         /// <summary>
