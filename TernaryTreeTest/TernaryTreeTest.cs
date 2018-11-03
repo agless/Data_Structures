@@ -11,6 +11,14 @@ namespace TernaryTreeTest
         private readonly string[] _keys = new string[] { "zero", "one", "two", "three", "four" };
         private readonly string[] _sortedKeys = new string[] { "four", "one", "three", "two", "zero" };
         private readonly int[] _sortedValues = new int[] { 4, 1, 3, 2, 0 };
+        private readonly KeyValuePair<string, int>[] _sortedKVPairs = new KeyValuePair<string, int>[]
+        {
+            new KeyValuePair<string, int>("four", 4),
+            new KeyValuePair<string, int>("one", 1),
+            new KeyValuePair<string, int>("three", 3),
+            new KeyValuePair<string, int>("two", 2),
+            new KeyValuePair<string, int>("zero", 0)
+        };
         private readonly IDictionary<string, int> _keyValueDictionary = new Dictionary<string, int>
         {
             { "zero", 0 }, { "one", 1 }, { "two", 2 }, { "three", 3 }, { "four", 4 }
@@ -48,7 +56,6 @@ namespace TernaryTreeTest
         }
 
         #endregion
-
 
         #region Add, Remove, and Count
 
@@ -139,6 +146,15 @@ namespace TernaryTreeTest
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueDictionary);
             ICollection<string> actualResult = subject.Keys();
             Assert.That(actualResult, Is.EqualTo(_sortedKeys));
+        }
+
+        [Test]
+        public void Copy_To_Returns_Correct_Result()
+        {
+            TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
+            KeyValuePair<string, int>[] actualResult = new KeyValuePair<string, int>[subject.Count];
+            subject.CopyTo(actualResult, 0);
+            Assert.That(actualResult, Is.EqualTo(_sortedKVPairs));
         }
 
         #endregion

@@ -27,24 +27,12 @@ namespace TernaryTree
         /// <summary>
         /// Returns the value associated with the current key.
         /// </summary>
-        object IEnumerator.Current
-        {
-            get
-            {
-                return _currentValue();
-            }
-        }
+        object IEnumerator.Current => _currentValue();
 
         /// <summary>
         /// Returns a <see cref="KeyValuePair{TKey, TValue}"/> with the current key and value.
         /// </summary>
-        KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current
-        {
-            get
-            {
-                return _currentValue();
-            }
-        }
+        KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current => _currentValue();
 
         /// <summary>
         /// Does nothing.

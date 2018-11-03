@@ -24,7 +24,7 @@ namespace TernaryTree
         {
             // Build a state machine by filling the _stateImplementations array with delegates.
             // Need to define my delegates below so that they can be plugged in with values.
-            // Just need to think of a delegate that can handle any type of transition / edge.
+            // Just need to think of all delegates to handle every type of transition / edge.
         }
 
         /// <summary>

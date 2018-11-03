@@ -145,8 +145,7 @@ namespace TernaryTree
                 {
                     throw new IndexOutOfRangeException();
                 }
-                string s;
-                _getKeyAtIndex(_head, new StringBuilder(), ref index, out s);
+                _getKeyAtIndex(_head, new StringBuilder(), ref index, out string s);
                 return s;
             }
         }
@@ -229,7 +228,10 @@ namespace TernaryTree
         /// <param name="value">The value of the element to add.</param>
         public void Add(string key, V value = default(V))
         {
-            _ = key ?? throw new ArgumentNullException(nameof(key));
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
             if (_head == null)
             {
                 _head = new Node<V> { Value = key[0] };
@@ -251,7 +253,7 @@ namespace TernaryTree
         /// </summary>
         public void Clear()
         {
-            _head = new Node<V>();
+            _head = null;
             Count = 0;
         }
 
@@ -262,6 +264,10 @@ namespace TernaryTree
         /// <returns></returns>
         public bool Contains(string key)
         {
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
             if (Count == 0)
             {
                 return false;
@@ -305,17 +311,26 @@ namespace TernaryTree
         /// <param name="arrayIndex"></param>
         public void CopyTo(KeyValuePair<string, V>[] array, int arrayIndex)
         {
+            _ = array ?? throw new ArgumentNullException(nameof(array));
+            if (arrayIndex < 0)
+            {
+                throw new IndexOutOfRangeException();
+            }
+            // ICollection API docs want me to do a check for multidimensional array.
+            // How do I check for multidimensional array?
+            // Is it even possible to call this with a multidimensional array?
+            // Seems like it wouldn't compile, given the above signature. (Test this.)
+            if (Count > array.Length - arrayIndex) // TODO: Test for off by one.
+            {
+                throw new ArgumentException($"{nameof(array)} does not have sufficient space");
+            }
             List<string> keys = new List<string>();
             _getBranchKeys(_head, new StringBuilder(), keys);
-
-            array = new KeyValuePair<string, V>[Count];
-
-            int pos = 0;
-            foreach (string key in keys)
+            for (int i = 0; i < keys.Count; i++)
             {
-                TryGetValue(key, out V value);
-                KeyValuePair<string, V> kvPair = new KeyValuePair<string, V>(key, value);
-                array[pos++] = kvPair;
+                TryGetValue(keys[i], out V value);
+                KeyValuePair<string, V> kvPair = new KeyValuePair<string, V>(keys[i], value);
+                array[arrayIndex++] = kvPair;
             }
         }
 
@@ -326,6 +341,10 @@ namespace TernaryTree
         /// <returns></returns>
         public bool Remove(string key)
         {
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException(nameof(key));
+            }
             Node<V> node = _getFinalNode(key, 0, _head);
             if (node == null)
             {
