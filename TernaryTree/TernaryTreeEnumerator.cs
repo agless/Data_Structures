@@ -7,34 +7,51 @@ namespace TernaryTree
 {
     class TernaryTreeEnumerator<V> : IEnumerator<KeyValuePair<string, V>>, IEnumerator
     {
-        private Node<V> _head;
-        private Node<V> _currentNode;
-        private StringBuilder _currentKey;
-        private bool _isInitialized = false;
-        private bool _isOutOfRange = false;
+        /*
+         TODO:  Enumerator should be able to go through one at a time instead of calling the expensive indexer.
+         Perhaps this can be accomplished by keeping a stack of state.
+         Each pop would expose a node and partial key (or a string builder).
+         Keep popping until you find the next key.
+         Also have to push every time you make a recursive call?
+         Then push the remaining state back on to the stack.
+             */
 
-        public TernaryTreeEnumerator(Node<V> head)
+        private TernaryTree<V> _tree;
+        private int _pos = -1;
+
+        public TernaryTreeEnumerator(TernaryTree<V> tree)
         {
-            _head = head ?? throw new ArgumentNullException(nameof(head));
+            _tree = tree ?? throw new ArgumentNullException(nameof(tree));
         }
-        
+
         /// <summary>
         /// Returns the value associated with the current key.
         /// </summary>
-        object IEnumerator.Current => _currentNode.Data;
+        object IEnumerator.Current
+        {
+            get
+            {
+                return _currentValue();
+            }
+        }
 
         /// <summary>
         /// Returns a <see cref="KeyValuePair{TKey, TValue}"/> with the current key and value.
         /// </summary>
-        KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current => 
-            new KeyValuePair<string, V>(_currentKey.ToString(), _currentNode.Data);
+        KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current
+        {
+            get
+            {
+                return _currentValue();
+            }
+        }
 
         /// <summary>
         /// Does nothing.
         /// </summary>
         /// <remarks>
         /// Microsoft documentation states that this method should be left empty
-        /// if there's nothing to clean up (i.e. no database connections to close).
+        /// if there's nothing to clean up (e.g. no database connections to close).
         /// </remarks>
         public void Dispose() { }
 
@@ -44,51 +61,16 @@ namespace TernaryTree
         /// <returns></returns>
         public bool MoveNext()
         {
+            _pos++;
             // If we're already past the end, don't even try
-            if (_isOutOfRange)
+            if (_pos > _tree.Count - 1)
             {
                 return false;
-            }
-
-            // If we haven't yet initialized
-            if (!_isInitialized)
-            {
-                _currentKey = new StringBuilder();
-                _findNextKey(_head);
-                if (!_isInitialized)
-                {
-                    // The tree must be empty
-                    return false;
-                }
-                else
-                {
-                    // A key was found
-                    return true;
-                }
-            }
-
-            if (_currentNode.Equal != null)
-            {
-                // Find keys that have a prefix including this character
-                _currentNode = _findNextKey(_currentNode.Equal);
             }
             else
             {
-                // Find keys that have the same prefix except a bigger character in this spot
-                _currentKey.Remove(_currentKey.Length - 1, 1);
-                if (_currentNode.Bigger != null)
-                {
-                    _currentNode = _findNextKey(_currentNode.Bigger);
-                }
+                return true;
             }
-
-            if (_isOutOfRange)
-            {
-                // If this search has taken us out of range
-                return false;
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -96,59 +78,23 @@ namespace TernaryTree
         /// </summary>
         public void Reset()
         {
-            _currentNode = null;
-            _currentKey = new StringBuilder();
-            _isInitialized = false;
-            _isOutOfRange = false;
+            // reset to BEFORE the first index (per Microsoft docs)
+            _pos = -1;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="keyBuilder"></param>
-        /// <returns></returns>
-        private Node<V> _findNextKey(Node<V> node)
+        private KeyValuePair<string, V> _currentValue()
         {
-            if (node.Smaller != null)
+            string key;
+            if (_pos >= 0 && _pos <= _tree.Count - 1)
             {
-                Node<V> first = _findNextKey(node.Smaller);
-                if (first != null)
-                {
-                    return first;
-                }
+                key = _tree[_pos];
             }
-            _currentKey.Append(node.Value);
-            if (node.IsFinalNode)
+            else
             {
-                _isInitialized = true;
-                return node;
+                key = string.Empty;
             }
-            if (node.Equal != null)
-            {
-                Node<V> first = _findNextKey(node.Equal);
-                if (first != null)
-                {
-                    return first;
-                }
-            }
-            // TODO: _findNextKey()
-            // Need to continue up the tree, stripping away characters from
-            // current key as appropriate (when _currentKey[_currentKey.Length - 1] == node.Value ?)
-            // and searching down the branch for every node.Bigger that isn't null.
-            // Only if _currentKey goes empty do we declare _isOutOfRange true and return null.
-            // This belongs in a while loop.
-            _currentKey.Remove(_currentKey.Length - 1, 1);
-            do
-            {
-                _currentKey.Remove(_currentKey.Length - 1, 1);
-                if (node.Bigger != null)
-                {
-                    return _findNextKey(node.Bigger);
-                }
-            } while (node.Parent != null);
-            _isOutOfRange = true;
-            return null;
+            _tree.TryGetValue(key, out V value);
+            return new KeyValuePair<string, V>(key, value);
         }
     }
 }

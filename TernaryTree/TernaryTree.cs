@@ -128,11 +128,20 @@ namespace TernaryTree
             }
         }
 
-        // TODO: Indexer:  this[int]
-        // Could have an IEnumerator on self as a field.
-        // Would also want to keep track of current position as a field.
-        // Next, next, next until you get there; return the value.
-        // If requested int is greater than Count, throw out of range exception.
+        public string this[int index]
+        {
+            get
+            {
+                if (index >= Count || index < 0)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+                string s;
+                _getKeyAtIndex(_head, new StringBuilder(), ref index, out s);
+                return s;
+            }
+        }
+
         #endregion
 
         #region Collections and Enumerators
@@ -188,7 +197,7 @@ namespace TernaryTree
         /// <returns></returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new TernaryTreeEnumerator<V>(_head);
+            return new TernaryTreeEnumerator<V>(this);
         }
 
         /// <summary>
@@ -197,7 +206,7 @@ namespace TernaryTree
         /// <returns></returns>
         IEnumerator<KeyValuePair<string, V>> IEnumerable<KeyValuePair<string, V>>.GetEnumerator()
         {
-            return new TernaryTreeEnumerator<V>(_head);
+            return new TernaryTreeEnumerator<V>(this);
         }
 
         #endregion
@@ -509,6 +518,46 @@ namespace TernaryTree
             {
                 _getBranchValues(node.Bigger, valueSet);
             }
+        }
+
+        private void _getKeyAtIndex(Node<V> node, StringBuilder keyBuild, ref int index, out string s)
+        {
+            if (node.Smaller != null)
+            {
+                _getKeyAtIndex(node.Smaller, new StringBuilder(keyBuild.ToString()), ref index, out s);
+                if (!string.IsNullOrEmpty(s))
+                {
+                    return;
+                }
+            }
+            StringBuilder oldString = new StringBuilder(keyBuild.ToString());
+            keyBuild.Append(node.Value);
+            if (node.IsFinalNode)
+            {
+                index--;
+                if (index < 0)
+                {
+                    s = keyBuild.ToString();
+                    return;
+                }
+            }
+            if (node.Equal != null)
+            {
+                _getKeyAtIndex(node.Equal, keyBuild, ref index, out s);
+                if (!string.IsNullOrEmpty(s))
+                {
+                    return;
+                }
+            }
+            if (node.Bigger != null)
+            {
+                _getKeyAtIndex(node.Bigger, oldString, ref index, out s);
+                if (!string.IsNullOrEmpty(s))
+                {
+                    return;
+                }
+            }
+            s = default(string);
         }
 
         /// <summary>
