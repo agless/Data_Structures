@@ -12,8 +12,8 @@ namespace TernaryTree
          Perhaps this can be accomplished by keeping a stack of state.
          Each pop would expose a node and partial key (or a string builder).
          Keep popping until you find the next key.
-         Also have to push every time you make a recursive call?
          Then push the remaining state back on to the stack.
+         (Also have to push every time you make a recursive call?)
              */
 
         private TernaryTree<V> _tree;

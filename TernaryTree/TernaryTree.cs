@@ -128,6 +128,15 @@ namespace TernaryTree
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// This is a relatively expensive operation.
+        /// Time and space complexity increase linearly with index.
+        /// </remarks>
         public string this[int index]
         {
             get
