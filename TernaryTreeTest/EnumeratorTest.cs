@@ -24,6 +24,7 @@ namespace TernaryTreeTest
             {
                 foreach (KeyValuePair<string, int> kvPair in subject)
                 {
+                    // TODO: Actually check that the enumerator returns elements in order / returns all elements
                     Assert.That(_keyValueCollection.Contains(kvPair));
                 }
             });

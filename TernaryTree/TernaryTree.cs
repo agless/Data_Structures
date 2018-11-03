@@ -120,13 +120,7 @@ namespace TernaryTree
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
-        public ICollection<string> this[TernaryTreeSearch<V> pattern]
-        {
-            get
-            {
-                return pattern.Match(_head);
-            }
-        }
+        public ICollection<string> this[TernaryTreeSearch<V> pattern] => pattern.Match(_head);
 
         /// <summary>
         /// 
@@ -406,6 +400,7 @@ namespace TernaryTree
                 // This is the last Node for this key
                 if (pos == key.Length - 1)
                 {
+                    // Check key collision (identical key already exists)
                     if (node.IsFinalNode)
                     {
                         return null;

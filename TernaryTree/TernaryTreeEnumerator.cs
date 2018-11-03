@@ -11,9 +11,9 @@ namespace TernaryTree
          TODO:  Enumerator should be able to go through one at a time instead of calling the expensive indexer.
          Perhaps this can be accomplished by keeping a stack of state.
          Each pop would expose a node and partial key (or a string builder).
-         Keep popping until you find the next key.
+         Keep popping / searching until you find the next key.
          Then push the remaining state back on to the stack.
-         (Also have to push every time you make a recursive call?)
+         (Also have to push every time you leave a Node with children to check.)
              */
 
         private TernaryTree<V> _tree;
@@ -81,7 +81,15 @@ namespace TernaryTree
             {
                 key = string.Empty;
             }
-            _tree.TryGetValue(key, out V value);
+            V value;
+            if (!string.IsNullOrEmpty(key))
+            {
+                _tree.TryGetValue(key, out value);
+            }
+            else
+            {
+                value = default(V);
+            }
             return new KeyValuePair<string, V>(key, value);
         }
     }
