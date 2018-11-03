@@ -7,6 +7,15 @@ namespace TernaryTree
 {
     class TernaryTreeEnumerator<V> : IEnumerator<KeyValuePair<string, V>>, IEnumerator
     {
+        /*
+         TODO:  Enumerator should be able to go through one at a time instead of calling the expensive indexer.
+         Perhaps this can be accomplished by keeping a stack of state.
+         Each pop would expose a node and partial key (or a string builder).
+         Keep popping until you find the next key.
+         Also have to push every time you make a recursive call?
+         Then push the remaining state back on to the stack.
+             */
+
         private TernaryTree<V> _tree;
         private int _pos = -1;
 

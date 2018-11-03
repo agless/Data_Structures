@@ -142,11 +142,6 @@ namespace TernaryTree
             }
         }
 
-        // TODO: Indexer:  this[int]
-        // Could have an IEnumerator on self as a field.
-        // Would also want to keep track of current position as a field.
-        // Next, next, next until you get there; return the value.
-        // If requested int is greater than Count, throw out of range exception.
         #endregion
 
         #region Collections and Enumerators

@@ -152,15 +152,25 @@ namespace TernaryTreeTest
             Assert.Multiple(() => {
                 for (int i = 0; i < _sortedKeys.Length; i++)
                 {
-                    string actualResult = subject[i];
-                    Assert.That(actualResult, Is.EqualTo(_sortedKeys[i]));
+                    Assert.That(subject[i], Is.EqualTo(_sortedKeys[i]));
                 }
             });
-        } 
+        }
 
         #endregion
 
         #region Errors
+
+        [TestCase(-1)]
+        [TestCase(5)]
+        public void This_Int_Throws_IndexOutOfRangeException(int index)
+        {
+            TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
+            Assert.Throws<IndexOutOfRangeException>(() => 
+            {
+                string actualResult = subject[index];
+            });
+        }
 
         [Test]
         public void Add_Key_Throws_ArgumentException_When_Adding_Duplicate_Keys()
