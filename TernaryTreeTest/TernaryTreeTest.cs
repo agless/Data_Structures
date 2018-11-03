@@ -49,6 +49,7 @@ namespace TernaryTreeTest
 
         #endregion
 
+
         #region Add, Remove, and Count
 
         [Test]
@@ -139,6 +140,23 @@ namespace TernaryTreeTest
             ICollection<string> actualResult = subject.Keys();
             Assert.That(actualResult, Is.EqualTo(_sortedKeys));
         }
+
+        #endregion
+
+        #region Indexers
+
+        [Test]
+        public void This_Int_Returns_Correct_Key()
+        {
+            TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueDictionary);
+            Assert.Multiple(() => {
+                for (int i = 0; i < _sortedKeys.Length; i++)
+                {
+                    string actualResult = subject[i];
+                    Assert.That(actualResult, Is.EqualTo(_sortedKeys[i]));
+                }
+            });
+        } 
 
         #endregion
 

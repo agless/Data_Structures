@@ -76,7 +76,7 @@ namespace TernaryTree
         private KeyValuePair<string, V> _currentValue()
         {
             string key;
-            if (_pos < 0 || _pos > _tree.Count - 1)
+            if (_pos >= 0 && _pos <= _tree.Count - 1)
             {
                 key = _tree[_pos];
             }

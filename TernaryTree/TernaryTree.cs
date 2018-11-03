@@ -132,11 +132,13 @@ namespace TernaryTree
         {
             get
             {
-                if (index >= Count - 1 || index < 0)
+                if (index >= Count || index < 0)
                 {
                     throw new IndexOutOfRangeException();
                 }
-                return _getKeyAtIndex(_head, new StringBuilder(), ref index);
+                string s;
+                _getKeyAtIndex(_head, new StringBuilder(), ref index, out s);
+                return s;
             }
         }
 
@@ -523,11 +525,15 @@ namespace TernaryTree
             }
         }
 
-        private string _getKeyAtIndex(Node<V> node, StringBuilder keyBuild, ref int index)
+        private void _getKeyAtIndex(Node<V> node, StringBuilder keyBuild, ref int index, out string s)
         {
             if (node.Smaller != null)
             {
-                _getKeyAtIndex(node.Smaller, keyBuild, ref index);
+                _getKeyAtIndex(node.Smaller, new StringBuilder(keyBuild.ToString()), ref index, out s);
+                if (!string.IsNullOrEmpty(s))
+                {
+                    return;
+                }
             }
             StringBuilder oldString = new StringBuilder(keyBuild.ToString());
             keyBuild.Append(node.Value);
@@ -536,23 +542,27 @@ namespace TernaryTree
                 index--;
                 if (index < 0)
                 {
-                    return keyBuild.ToString();
+                    s = keyBuild.ToString();
+                    return;
                 }
             }
             if (node.Equal != null)
             {
-                _getKeyAtIndex(node.Equal, keyBuild, ref index);
+                _getKeyAtIndex(node.Equal, keyBuild, ref index, out s);
+                if (!string.IsNullOrEmpty(s))
+                {
+                    return;
+                }
             }
             if (node.Bigger != null)
             {
-                _getKeyAtIndex(node.Bigger, oldString, ref index);
+                _getKeyAtIndex(node.Bigger, oldString, ref index, out s);
+                if (!string.IsNullOrEmpty(s))
+                {
+                    return;
+                }
             }
-
-            // This is unreachable, so long as original caller provides
-            // an index that is less than or equal to Count - 1.
-            // The public indexer takes care of this.
-            // Private callers beware.
-            throw new ArgumentException(nameof(index));
+            s = default(string);
         }
 
         /// <summary>
