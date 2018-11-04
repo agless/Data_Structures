@@ -504,6 +504,8 @@ namespace TernaryTree
             }
             StringBuilder oldString = new StringBuilder(keyBuild.ToString());
             keyBuild.Append(head.Value);
+            // TODO: Maybe this should be a LinkedList instead of a List?
+            // Seems like performance would be better.
             if (head.IsFinalNode)
             {
                 keySet.Add(keyBuild.ToString()); 

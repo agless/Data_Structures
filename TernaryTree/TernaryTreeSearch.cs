@@ -51,7 +51,7 @@ namespace TernaryTree
 
         private Func<char, int> _matchRange(char a, char b, int successState, int failureState)
         {
-            Func<char, int> f = c =>
+            int f(char c)
             {
                 if (c >= _getMinChar(a, b) && c <= _getMaxChar(a, b))
                 {
@@ -63,7 +63,7 @@ namespace TernaryTree
                 {
                     return failureState;
                 }
-            };
+            }
             return f;
         }
         
