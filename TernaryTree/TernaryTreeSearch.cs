@@ -12,10 +12,6 @@ namespace TernaryTree
         private delegate int Transition(char c);
         private List<List<Transition>> _transitions;
         private int _state;
-        // Delegates are MatchRange, MatchExact, MatchAny, etc.
-        // They return bool (whether a match was made) - so you know whether to send
-        // the machine down the branch.
-        // They set _state according to whether a match was made
 
         /// <summary>
         /// 
@@ -55,6 +51,10 @@ namespace TernaryTree
 
         private void _getBranchMatches(Node<V> node, StringBuilder keyBuilder, ICollection<string> matches)
         {
+            if (_state >= _transitions.Count)
+            {
+                return;
+            }
             if (node.Smaller != null)
             {
                 TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(_transitions, _state);

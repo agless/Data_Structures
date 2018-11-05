@@ -17,6 +17,20 @@ namespace TernaryTreeTest
         };
 
         [Test]
+        public void Exact_Match()
+        {
+            TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
+            ICollection<string> actualResult = subject[new TernaryTreeSearch<int>("one")];
+            string[] resultArray = new string[actualResult.Count];
+            actualResult.CopyTo(resultArray, 0);
+            Assert.Multiple(() =>
+            {
+                Assert.That(resultArray.Length, Is.EqualTo(1));
+                Assert.That(resultArray[0], Is.EqualTo("one"));
+            });
+        }
+
+        [Test]
         public void Prefix_Exact()
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
