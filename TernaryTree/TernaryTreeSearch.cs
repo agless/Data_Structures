@@ -104,22 +104,6 @@ namespace TernaryTree
             return f;
         }
 
-        private Func<char, int> _matchRange(char a, char b, int successState)
-        {
-            int f(char c)
-            {
-                if (c >= _getMinChar(a, b) && c <= _getMaxChar(a, b))
-                {
-                    return successState;
-                }
-                else
-                {
-                    return -1;
-                }
-            }
-            return f;
-        }
-
         private Func<char, int> _matchExact(char a, int successState)
         {
             int f(char c)
@@ -136,6 +120,38 @@ namespace TernaryTree
             return f;
         }
         
+        private Func<char, int> _matchRange(char a, char b, int successState)
+        {
+            int f(char c)
+            {
+                if (c >= _getMinChar(a, b) && c <= _getMaxChar(a, b))
+                {
+                    return successState;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+            return f;
+        }
+
+        private Func<char, int> _matchAnyOf(ICollection<char> matches, int successState)
+        {
+            int f(char c)
+            {
+                foreach (char match in matches)
+                {
+                    if (c == match)
+                    {
+                        return successState;
+                    }
+                }
+                return -1;
+            }
+            return f;
+        }
+
         private char _getMinChar(char a, char b)
         {
             if (a <= b)
