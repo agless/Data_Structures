@@ -10,7 +10,7 @@ namespace TernaryTree
     public class TernaryTreeSearch<V>
     {
         private delegate int Transition(char c);
-        private List<Transition> _transitions;
+        private List<List<Transition>> _transitions;
         private int _state;
         // Delegates are MatchRange, MatchExact, MatchAny, etc.
         // They return bool (whether a match was made) - so you know whether to send
@@ -27,12 +27,14 @@ namespace TernaryTree
             // Need to define my delegates below so that they can be plugged in with values.
             // Just need to think of all delegates to handle every type of transition / edge.
             // Example of how to add an edge to the state machine:
-            // _transitions[0] += _matchRange(pattern[0], pattern[3], 1, 0) as Transition;
-            // Alternatively, _transitions could be a List<List<Transition>> and we could do:
-            // _transitions[0][0] = new Transition(_matchRange(pattern[0], pattern[3], 1, 0));
-            // _transitions[0][1] = new Transition(_matchExact(pattern[1], 1, 0);
-            // And then an iteration of Match() would go:
-            // foreach (Transition t in _transitions[_state]) t.Invoke(Node.Value);
+            // Transition t = new Transition(_matchRange(pattern[0], pattern[3], 1, 0));
+            // _transitions[i].Add(t);
+        }
+
+        private TernaryTreeSearch(List<List<Transition>> transitions, int state)
+        {
+            _transitions = transitions;
+            _state = state;
         }
 
         /// <summary>
@@ -46,22 +48,89 @@ namespace TernaryTree
             // recursively invoke state, make a copy of this state machine,
             // and send the copy down branches as instructed by the result?
             // Or write the delegates to handle that?
-            throw new NotImplementedException();
+            ICollection<string> matches = new LinkedList<string>();
+            _getBranchMatches(node, new StringBuilder(), matches);
+            return matches;
         }
 
-        private Func<char, int> _matchRange(char a, char b, int successState, int failureState)
+        private void _getBranchMatches(Node<V> node, StringBuilder keyBuilder, ICollection<string> matches)
+        {
+            if (node.Smaller != null)
+            {
+                TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(_transitions, _state);
+                tts._getBranchMatches(node.Smaller, new StringBuilder(keyBuilder.ToString()), matches);
+            }
+            StringBuilder oldString = new StringBuilder(keyBuilder.ToString());
+            int oldState = _state;
+            keyBuilder.Append(node.Value);
+            foreach (Transition transition in _transitions[_state])
+            {
+                int nextState = transition.Invoke(node.Value);
+                if (nextState > -1)
+                {
+                    if (nextState == _transitions.Count)
+                    {
+                        matches.Add(keyBuilder.ToString());
+                    }
+                    if (node.Equal != null)
+                    {
+                        _state = nextState;
+                        _getBranchMatches(node.Equal, keyBuilder, matches);
+                        _state = oldState;
+                    }
+                }
+            }
+            if (node.Bigger != null)
+            {
+                _getBranchMatches(node.Bigger, oldString, matches);
+            }
+        }
+
+        private Func<char, int> _matchEverything(int successState)
+        {
+            int f(char c)
+            {
+                return successState;
+            }
+            return f;
+        }
+
+        private Func<char, int> _matchNothing()
+        {
+            int f(char c)
+            {
+                return -1;
+            }
+            return f;
+        }
+
+        private Func<char, int> _matchRange(char a, char b, int successState)
         {
             int f(char c)
             {
                 if (c >= _getMinChar(a, b) && c <= _getMaxChar(a, b))
                 {
-                    // Maybe we should handle cloning the state machine
-                    // and sending it down the branch here?
                     return successState;
                 }
                 else
                 {
-                    return failureState;
+                    return -1;
+                }
+            }
+            return f;
+        }
+
+        private Func<char, int> _matchExact(char a, int successState)
+        {
+            int f(char c)
+            {
+                if (c == a)
+                {
+                    return successState;
+                }
+                else
+                {
+                    return -1;
                 }
             }
             return f;
