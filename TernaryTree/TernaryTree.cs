@@ -8,6 +8,7 @@ namespace TernaryTree
     // TODO: Logging?
     // TODO: Error Handling and Documentation.  Follow Microsoft lead with interfaces.
     // TODO: Unit tests.
+    // TODO: What if you try to add a string with whitespace or line-end characters?
 
     /// <summary>
     /// Provides a structure for storing key value pairs.
