@@ -81,22 +81,22 @@ namespace TernaryTree
             {
                 if (node.Bigger != null)
                 {
-                    Step s = _createStep(node.Bigger, key) as Step; // TODO: Why is this cast necesary? Doing something wrong?
+                    Step s = new Step(_createStep(node.Bigger, key));
                     _nextStep.Push(s);
                 }
                 if (node.Equal != null)
                 {
-                    Step s = _createStep(node.Equal, key + node.Value) as Step;
+                    Step s = new Step(_createStep(node.Equal, key + node.Value));
                     _nextStep.Push(s);
                 }
                 if (node.IsFinalNode)
                 {
-                    Step s = _createStepCheckFinalNode(node, key + node.Value) as Step;
+                    Step s = new Step(_createStepCheckFinalNode(node, key + node.Value));
                     _nextStep.Push(s);
                 }
                 if (node.Smaller != null)
                 {
-                    Step s = _createStep(node.Smaller, key) as Step;
+                    Step s = new Step(_createStep(node.Smaller, key));
                     _nextStep.Push(s);
                 }
                 return default(string);
