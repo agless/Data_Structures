@@ -14,13 +14,13 @@ namespace TernaryTree
          Keep popping / searching until you find the next key.
          Then push the remaining state back on to the stack.
          (Also have to push every time you leave a Node with children to check.)
-
-            
              */
 
+        private delegate string Step();
+        private Stack<Step> _nextStep;
         private TernaryTree<V> _tree;
-        private int _pos = -1;
-        // TODO: Add a stack, but don't initialize
+        private bool _isInitialized = false;
+        // TODO: Save current key as a field.
 
         public TernaryTreeEnumerator(TernaryTree<V> tree)
         {
@@ -30,7 +30,7 @@ namespace TernaryTree
         /// <summary>
         /// Returns the value associated with the current key.
         /// </summary>
-        object IEnumerator.Current => _currentValue();
+        object IEnumerator.Current => _currentValue();  // TODO: Need to save current key as a field and build a key value pair for return by calling _tree.
 
         /// <summary>
         /// Returns a <see cref="KeyValuePair{TKey, TValue}"/> with the current key and value.
@@ -52,18 +52,18 @@ namespace TernaryTree
         /// <returns></returns>
         public bool MoveNext()
         {
-            // TODO: IF stack is null, put _head on the stack
-            // Otherwise, pop and search until you find the next valid key
-            _pos++;
-            // If we're already past the end, don't even try
-            if (_pos > _tree.Count - 1)
+            if (!_isInitialized)
             {
-                return false;
+                // Need to change back to asking for _head on construction
             }
-            else
+            string s = default(string);
+            while(_nextStep.Count > 0 && string.IsNullOrEmpty(s))
             {
-                return true;
+                s = _nextStep.Pop().Invoke();
+                // save string to prepare return for Current
+                // return true;
             }
+            // if stack's empty and s is stil null, return false
         }
 
         /// <summary>
@@ -71,32 +71,50 @@ namespace TernaryTree
         /// </summary>
         public void Reset()
         {
-            // TODO: Reset the stack to null
-            // reset to BEFORE the first index (per Microsoft docs)
-            _pos = -1;
+            _nextStep.Clear();
+            _isInitialized = false;
         }
 
-        private KeyValuePair<string, V> _currentValue()
+        private Func<string> _createStep(Node<V> node, string key)
         {
-            string key;
-            if (_pos >= 0 && _pos <= _tree.Count - 1)
+            string f()
             {
-                key = _tree[_pos];
+                if (node.Bigger != null)
+                {
+                    Step s = _createStep(node.Bigger, key) as Step; // TODO: Why is this cast necesary? Doing something wrong?
+                    _nextStep.Push(s);
+                }
+                if (node.Equal != null)
+                {
+                    Step s = _createStep(node.Equal, key + node.Value) as Step;
+                    _nextStep.Push(s);
+                }
+                if (node.IsFinalNode)
+                {
+                    Step s = _createStepCheckFinalNode(node, key + node.Value) as Step;
+                    _nextStep.Push(s);
+                }
+                if (node.Smaller != null)
+                {
+                    Step s = _createStep(node.Smaller, key) as Step;
+                    _nextStep.Push(s);
+                }
+                return default(string);
             }
-            else
+            return f;
+        }
+
+        private Func<string> _createStepCheckFinalNode(Node<V> node, string key)
+        {
+            string f()
             {
-                key = string.Empty;
+                if (node.IsFinalNode)
+                {
+                    return key;
+                }
+                return default(string);
             }
-            V value;
-            if (!string.IsNullOrEmpty(key))
-            {
-                _tree.TryGetValue(key, out value);
-            }
-            else
-            {
-                value = default(V);
-            }
-            return new KeyValuePair<string, V>(key, value);
+            return f;
         }
     }
 }
