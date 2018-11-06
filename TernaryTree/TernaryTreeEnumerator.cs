@@ -14,10 +14,13 @@ namespace TernaryTree
          Keep popping / searching until you find the next key.
          Then push the remaining state back on to the stack.
          (Also have to push every time you leave a Node with children to check.)
+
+            
              */
 
         private TernaryTree<V> _tree;
         private int _pos = -1;
+        // TODO: Add a stack, but don't initialize
 
         public TernaryTreeEnumerator(TernaryTree<V> tree)
         {
@@ -49,6 +52,8 @@ namespace TernaryTree
         /// <returns></returns>
         public bool MoveNext()
         {
+            // TODO: IF stack is null, put _head on the stack
+            // Otherwise, pop and search until you find the next valid key
             _pos++;
             // If we're already past the end, don't even try
             if (_pos > _tree.Count - 1)
@@ -66,6 +71,7 @@ namespace TernaryTree
         /// </summary>
         public void Reset()
         {
+            // TODO: Reset the stack to null
             // reset to BEFORE the first index (per Microsoft docs)
             _pos = -1;
         }
