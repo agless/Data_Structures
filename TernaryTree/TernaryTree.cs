@@ -199,7 +199,7 @@ namespace TernaryTree
         /// <returns></returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new TernaryTreeEnumerator<V>(this);
+            return new TernaryTreeEnumerator<V>(this, _head);
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace TernaryTree
         /// <returns></returns>
         IEnumerator<KeyValuePair<string, V>> IEnumerable<KeyValuePair<string, V>>.GetEnumerator()
         {
-            return new TernaryTreeEnumerator<V>(this);
+            return new TernaryTreeEnumerator<V>(this, _head);
         }
 
         #endregion

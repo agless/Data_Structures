@@ -7,21 +7,17 @@ namespace TernaryTree
 {
     class TernaryTreeEnumerator<V> : IEnumerator<KeyValuePair<string, V>>, IEnumerator
     {
-        /*
-         TODO:  Enumerator should be able to go through one at a time instead of calling the expensive indexer.
-         Perhaps this can be accomplished by keeping a stack of state.
-         Each pop would expose a node and partial key (or a string builder).
-         Keep popping / searching until you find the next key.
-         Then push the remaining state back on to the stack.
-         (Also have to push every time you leave a Node with children to check.)
-             */
-
+        private delegate string Step();
+        private Stack<Step> _nextStep = new Stack<Step>();
         private TernaryTree<V> _tree;
-        private int _pos = -1;
+        private Node<V> _head;
+        private bool _isInitialized = false;
+        private string _currentKey;
 
-        public TernaryTreeEnumerator(TernaryTree<V> tree)
+        public TernaryTreeEnumerator(TernaryTree<V> tree, Node<V> head)
         {
             _tree = tree ?? throw new ArgumentNullException(nameof(tree));
+            _head = head ?? throw new ArgumentNullException(nameof(head));
         }
 
         /// <summary>
@@ -44,53 +40,90 @@ namespace TernaryTree
         public void Dispose() { }
 
         /// <summary>
-        /// 
+        /// Moves to the next <see cref="KeyValuePair"/> in the enumeration.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Returns <code>true</code> if the next <see cref="KeyValuePair"/> was found.
+        /// Otherwise returns <code>false</code>.</returns>
         public bool MoveNext()
         {
-            _pos++;
-            // If we're already past the end, don't even try
-            if (_pos > _tree.Count - 1)
+            if (!_isInitialized)
             {
-                return false;
+                Step firstStep = new Step(_createStep(_head, default(string)));
+                _nextStep.Push(firstStep);
+
+            }
+            string s = default(string);
+            while(_nextStep.Count > 0 && string.IsNullOrEmpty(s))
+            {
+                s = _nextStep.Pop().Invoke();
+            }
+            if (!string.IsNullOrEmpty(s))
+            {
+                _currentKey = s;
+                if (!_isInitialized)
+                {
+                    _isInitialized = true;
+                }
+                return true;
             }
             else
             {
-                return true;
+                return false;
             }
         }
 
         /// <summary>
-        /// 
+        /// Resets the enumerator to before the first <see cref="KeyValuePair"/> in the enumeration.
         /// </summary>
         public void Reset()
         {
-            // reset to BEFORE the first index (per Microsoft docs)
-            _pos = -1;
+            _nextStep.Clear();
+            _isInitialized = false;
         }
 
         private KeyValuePair<string, V> _currentValue()
         {
-            string key;
-            if (_pos >= 0 && _pos <= _tree.Count - 1)
+            _tree.TryGetValue(_currentKey, out V value);
+            return new KeyValuePair<string, V>(_currentKey, value);
+        }
+
+        private Func<string> _createStep(Node<V> node, string key)
+        {
+            string f()
             {
-                key = _tree[_pos];
+                if (node.Bigger != null)
+                {
+                    Step s = new Step(_createStep(node.Bigger, key));
+                    _nextStep.Push(s);
+                }
+                if (node.Equal != null)
+                {
+                    Step s = new Step(_createStep(node.Equal, key + node.Value));
+                    _nextStep.Push(s);
+                }
+                Step checkFinalNode = new Step(_checkFinalNode(node, key + node.Value));
+                _nextStep.Push(checkFinalNode);
+                if (node.Smaller != null)
+                {
+                    Step s = new Step(_createStep(node.Smaller, key));
+                    _nextStep.Push(s);
+                }
+                return default(string);
             }
-            else
+            return f;
+        }
+
+        private Func<string> _checkFinalNode(Node<V> node, string key)
+        {
+            string f()
             {
-                key = string.Empty;
+                if (node.IsFinalNode)
+                {
+                    return key;
+                }
+                else return default(string);
             }
-            V value;
-            if (!string.IsNullOrEmpty(key))
-            {
-                _tree.TryGetValue(key, out value);
-            }
-            else
-            {
-                value = default(V);
-            }
-            return new KeyValuePair<string, V>(key, value);
+            return f;
         }
     }
 }
