@@ -30,12 +30,6 @@ namespace TernaryTree
         /// </summary>
         KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current => _currentValue();
 
-        private KeyValuePair<string, V> _currentValue()
-        {
-            _tree.TryGetValue(_currentKey, out V value);
-            return new KeyValuePair<string, V>(_currentKey, value);
-        }
-
         /// <summary>
         /// Does nothing.
         /// </summary>
@@ -84,6 +78,12 @@ namespace TernaryTree
         {
             _nextStep.Clear();
             _isInitialized = false;
+        }
+
+        private KeyValuePair<string, V> _currentValue()
+        {
+            _tree.TryGetValue(_currentKey, out V value);
+            return new KeyValuePair<string, V>(_currentKey, value);
         }
 
         private Func<string> _createStep(Node<V> node, string key)
