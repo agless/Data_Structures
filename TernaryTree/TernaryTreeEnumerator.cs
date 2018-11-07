@@ -7,15 +7,6 @@ namespace TernaryTree
 {
     class TernaryTreeEnumerator<V> : IEnumerator<KeyValuePair<string, V>>, IEnumerator
     {
-        /*
-         TODO:  Enumerator should be able to go through one at a time instead of calling the expensive indexer.
-         Perhaps this can be accomplished by keeping a stack of state.
-         Each pop would expose a node and partial key (or a string builder).
-         Keep popping / searching until you find the next key.
-         Then push the remaining state back on to the stack.
-         (Also have to push every time you leave a Node with children to check.)
-             */
-
         private delegate string Step();
         private Stack<Step> _nextStep = new Stack<Step>();
         private TernaryTree<V> _tree;
@@ -32,7 +23,7 @@ namespace TernaryTree
         /// <summary>
         /// Returns the value associated with the current key.
         /// </summary>
-        object IEnumerator.Current => _currentValue();  // TODO: Need to save current key as a field and build a key value pair for return by calling _tree.
+        object IEnumerator.Current => _currentValue();
 
         /// <summary>
         /// Returns a <see cref="KeyValuePair{TKey, TValue}"/> with the current key and value.
@@ -41,7 +32,8 @@ namespace TernaryTree
 
         private KeyValuePair<string, V> _currentValue()
         {
-            return new KeyValuePair<string, V>(_currentKey, _head.Data);
+            _tree.TryGetValue(_currentKey, out V value);
+            return new KeyValuePair<string, V>(_currentKey, value);
         }
 
         /// <summary>
@@ -73,6 +65,10 @@ namespace TernaryTree
             if (!string.IsNullOrEmpty(s))
             {
                 _currentKey = s;
+                if (!_isInitialized)
+                {
+                    _isInitialized = true;
+                }
                 return true;
             }
             else
@@ -104,11 +100,8 @@ namespace TernaryTree
                     Step s = new Step(_createStep(node.Equal, key + node.Value));
                     _nextStep.Push(s);
                 }
-                if (node.IsFinalNode)
-                {
-                    Step s = new Step(_createStepReturnKey(node, key + node.Value));
-                    _nextStep.Push(s);
-                }
+                Step checkFinalNode = new Step(_checkFinalNode(node, key + node.Value));
+                _nextStep.Push(checkFinalNode);
                 if (node.Smaller != null)
                 {
                     Step s = new Step(_createStep(node.Smaller, key));
@@ -119,11 +112,15 @@ namespace TernaryTree
             return f;
         }
 
-        private Func<string> _createStepReturnKey(Node<V> node, string key)
+        private Func<string> _checkFinalNode(Node<V> node, string key)
         {
             string f()
             {
-                return key;
+                if (node.IsFinalNode)
+                {
+                    return key;
+                }
+                else return default(string);
             }
             return f;
         }
