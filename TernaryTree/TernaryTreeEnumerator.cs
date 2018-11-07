@@ -40,9 +40,10 @@ namespace TernaryTree
         public void Dispose() { }
 
         /// <summary>
-        /// 
+        /// Moves to the next <see cref="KeyValuePair"/> in the enumeration.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Returns <code>true</code> if the next <see cref="KeyValuePair"/> was found.
+        /// Otherwise returns <code>false</code>.</returns>
         public bool MoveNext()
         {
             if (!_isInitialized)
@@ -72,7 +73,7 @@ namespace TernaryTree
         }
 
         /// <summary>
-        /// 
+        /// Resets the enumerator to before the first <see cref="KeyValuePair"/> in the enumeration.
         /// </summary>
         public void Reset()
         {
