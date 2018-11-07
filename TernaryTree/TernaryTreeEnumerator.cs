@@ -17,14 +17,16 @@ namespace TernaryTree
              */
 
         private delegate string Step();
-        private Stack<Step> _nextStep;
+        private Stack<Step> _nextStep = new Stack<Step>();
         private TernaryTree<V> _tree;
+        private Node<V> _head;
         private bool _isInitialized = false;
-        // TODO: Save current key as a field.
+        private string _currentKey;
 
-        public TernaryTreeEnumerator(TernaryTree<V> tree)
+        public TernaryTreeEnumerator(TernaryTree<V> tree, Node<V> head)
         {
             _tree = tree ?? throw new ArgumentNullException(nameof(tree));
+            _head = head ?? throw new ArgumentNullException(nameof(head));
         }
 
         /// <summary>
@@ -36,6 +38,11 @@ namespace TernaryTree
         /// Returns a <see cref="KeyValuePair{TKey, TValue}"/> with the current key and value.
         /// </summary>
         KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current => _currentValue();
+
+        private KeyValuePair<string, V> _currentValue()
+        {
+            return new KeyValuePair<string, V>(_currentKey, _head.Data);
+        }
 
         /// <summary>
         /// Does nothing.
@@ -54,16 +61,24 @@ namespace TernaryTree
         {
             if (!_isInitialized)
             {
-                // Need to change back to asking for _head on construction
+                Step firstStep = new Step(_createStep(_head, default(string)));
+                _nextStep.Push(firstStep);
+
             }
             string s = default(string);
             while(_nextStep.Count > 0 && string.IsNullOrEmpty(s))
             {
                 s = _nextStep.Pop().Invoke();
-                // save string to prepare return for Current
-                // return true;
             }
-            // if stack's empty and s is stil null, return false
+            if (!string.IsNullOrEmpty(s))
+            {
+                _currentKey = s;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -91,7 +106,7 @@ namespace TernaryTree
                 }
                 if (node.IsFinalNode)
                 {
-                    Step s = new Step(_createStepCheckFinalNode(node, key + node.Value));
+                    Step s = new Step(_createStepReturnKey(node, key + node.Value));
                     _nextStep.Push(s);
                 }
                 if (node.Smaller != null)
@@ -104,15 +119,11 @@ namespace TernaryTree
             return f;
         }
 
-        private Func<string> _createStepCheckFinalNode(Node<V> node, string key)
+        private Func<string> _createStepReturnKey(Node<V> node, string key)
         {
             string f()
             {
-                if (node.IsFinalNode)
-                {
-                    return key;
-                }
-                return default(string);
+                return key;
             }
             return f;
         }
