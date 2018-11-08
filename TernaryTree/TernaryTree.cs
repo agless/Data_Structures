@@ -382,6 +382,24 @@ namespace TernaryTree
 
         #endregion
 
+        #region Public Methods
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        public ICollection<string> MatchPattern(string pattern) => this[new TernaryTreeSearch<V>(pattern)];
+
+        public ICollection<string> MatchPrefix(string prefix)
+        {
+            List<string> keys = new List<string>();
+            Node<V> node = _getFinalNode(prefix, 0, _head);
+            _getBranchKeys(node, new StringBuilder(), keys);
+            return keys;
+        }
+        #endregion
+
         #region Private Methods
 
         /// <summary>
