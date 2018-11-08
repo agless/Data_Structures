@@ -60,7 +60,7 @@ namespace TernaryTreeTest
         #region Add, Remove, and Count
 
         [Test]
-        public void Count_Returns_Correct_Value_After_Consecutive_Add_Key_Calls()
+        public void Count_After_Consecutive_Add_Key_Calls()
         {
             TernaryTree<string> subject = new TernaryTree<string>();
             foreach (string key in _keys)
@@ -71,7 +71,7 @@ namespace TernaryTreeTest
         }
 
         [Test]
-        public void Count_Returns_Correct_Value_After_Consecutive_Add_Key_Value_Calls()
+        public void Count_After_Consecutive_Add_Key_Value_Calls()
         {
             TernaryTree<int> subject = new TernaryTree<int>();
             foreach (KeyValuePair<string, int> kvPair in _keyValueCollection)
@@ -82,7 +82,7 @@ namespace TernaryTreeTest
         }
 
         [Test]
-        public void Count_Returns_Correct_Value_After_Consecutive_Add_KeyValuePair_Calls()
+        public void Count_After_Consecutive_Add_KeyValuePair_Calls()
         {
             TernaryTree<int> subject = new TernaryTree<int>();
             foreach (KeyValuePair<string, int> kvPair in _keyValueCollection)
@@ -93,7 +93,7 @@ namespace TernaryTreeTest
         }
 
         [Test]
-        public void Count_Returns_Correct_Value_After_Consecutive_Calls_To_Remove()
+        public void Count_After_Consecutive_Calls_To_Remove()
         {
             TernaryTree<string> subject = TernaryTree<string>.Create(_keys);
             foreach (string key in _keys)
@@ -200,7 +200,7 @@ namespace TernaryTreeTest
         }
 
         [Test]
-        public void Add_Key_Value_Throws_ArgumentException_When_Adding_Duplicate_Keys()
+        public void Add_Key_Value_Throws_ArgumentException_For_Duplicate_Keys()
         {
             TernaryTree<int> subject = new TernaryTree<int>();
             Assert.Throws<ArgumentException>(() => 
@@ -211,7 +211,7 @@ namespace TernaryTreeTest
         }
 
         [Test]
-        public void Add_KeyValuePair_Throws_ArgumentException_When_Adding_Duplicate_Keys()
+        public void Add_KeyValuePair_Throws_ArgumentException_For_Duplicate_Keys()
         {
             TernaryTree<int> subject = new TernaryTree<int>();
             KeyValuePair<string, int> kvPair = new KeyValuePair<string, int>(_keys[0], 0);
