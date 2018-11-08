@@ -51,11 +51,11 @@ namespace TernaryTree
             // and send the copy down branches as instructed by the result?
             // Or write the delegates to handle that?
             ICollection<string> matches = new LinkedList<string>();
-            _getBranchMatches(node, new StringBuilder(), matches);
+            _getBranchMatches(node, default(string), matches);
             return matches;
         }
 
-        private void _getBranchMatches(Node<V> node, StringBuilder keyBuilder, ICollection<string> matches)
+        private void _getBranchMatches(Node<V> node, string keyBuilder, ICollection<string> matches)
         {
             if (_state >= _transitions.Count)
             {
@@ -64,11 +64,11 @@ namespace TernaryTree
             if (node.Smaller != null)
             {
                 TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(_transitions, _state);
-                tts._getBranchMatches(node.Smaller, new StringBuilder(keyBuilder.ToString()), matches);
+                tts._getBranchMatches(node.Smaller, keyBuilder, matches);
             }
             StringBuilder oldString = new StringBuilder(keyBuilder.ToString());
             int oldState = _state;
-            keyBuilder.Append(node.Value);
+            string newKey = keyBuilder + node.Value;
             foreach (Transition transition in _transitions[_state])
             {
                 int nextState = transition.Invoke(node.Value);
@@ -76,19 +76,19 @@ namespace TernaryTree
                 {
                     if (nextState == _transitions.Count && node.IsFinalNode)
                     {
-                        matches.Add(keyBuilder.ToString());
+                        matches.Add(newKey);
                     }
                     if (nextState < _transitions.Count && node.Equal != null)
                     {
                         _state = nextState;
-                        _getBranchMatches(node.Equal, keyBuilder, matches); // Should I be making a new keyBuilder each time?
+                        _getBranchMatches(node.Equal, newKey, matches);
                         _state = oldState;
                     }
                 }
             }
             if (node.Bigger != null)
             {
-                _getBranchMatches(node.Bigger, oldString, matches);
+                _getBranchMatches(node.Bigger, keyBuilder, matches);
             }
         }
 
