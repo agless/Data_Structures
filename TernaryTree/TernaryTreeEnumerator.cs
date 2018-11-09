@@ -23,12 +23,12 @@ namespace TernaryTree
         /// <summary>
         /// Returns the value associated with the current key.
         /// </summary>
-        object IEnumerator.Current => _currentValue();
+        object IEnumerator.Current => _currentKey;
 
         /// <summary>
         /// Returns a <see cref="KeyValuePair{TKey, TValue}"/> with the current key and value.
         /// </summary>
-        KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current => _currentValue();
+        KeyValuePair<string, V> IEnumerator<KeyValuePair<string, V>>.Current => _currentKeyValuePair();
 
         /// <summary>
         /// Does nothing.
@@ -73,7 +73,7 @@ namespace TernaryTree
         }
 
         /// <summary>
-        /// Resets the enumerator to before the first <see cref="KeyValuePair"/> in the enumeration.
+        /// Resets the enumerator to before the first element in the enumeration.
         /// </summary>
         public void Reset()
         {
@@ -81,7 +81,7 @@ namespace TernaryTree
             _isInitialized = false;
         }
 
-        private KeyValuePair<string, V> _currentValue()
+        private KeyValuePair<string, V> _currentKeyValuePair()
         {
             _tree.TryGetValue(_currentKey, out V value);
             return new KeyValuePair<string, V>(_currentKey, value);
@@ -101,8 +101,11 @@ namespace TernaryTree
                     Step s = new Step(_createStep(node.Equal, key + node.Value));
                     _nextStep.Push(s);
                 }
-                Step checkFinalNode = new Step(_checkFinalNode(node, key + node.Value));
-                _nextStep.Push(checkFinalNode);
+                if (node.IsFinalNode)
+                {
+                    Step returnKey = new Step(_returnKey(key + node.Value));
+                    _nextStep.Push(returnKey);
+                }
                 if (node.Smaller != null)
                 {
                     Step s = new Step(_createStep(node.Smaller, key));
@@ -113,15 +116,11 @@ namespace TernaryTree
             return f;
         }
 
-        private Func<string> _checkFinalNode(Node<V> node, string key)
+        private Func<string> _returnKey(string key)
         {
             string f()
             {
-                if (node.IsFinalNode)
-                {
-                    return key;
-                }
-                else return default(string);
+                return key;
             }
             return f;
         }

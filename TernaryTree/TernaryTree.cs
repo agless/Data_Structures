@@ -174,12 +174,21 @@ namespace TernaryTree
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="pattern"></param>
+        /// <param name="pattern">A regular expression to match.</param>
         /// <returns></returns>
-        public ICollection<string> Match(string pattern)
+        public ICollection<string> Match(string pattern) => this[new TernaryTreeSearch<V>(pattern)];
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="prefix">The prefix to search.</param>
+        /// <returns></returns>
+        public ICollection<string> MatchPrefix(string prefix)
         {
-            TernaryTreeSearch<V> search = new TernaryTreeSearch<V>(pattern);
-            return search.Match(_head);
+            List<string> keys = new List<string>();
+            Node<V> node = _getFinalNode(prefix, 0, _head);
+            _getBranchKeys(node, new StringBuilder(), keys);
+            return keys;
         }
 
         /// <summary>
@@ -380,24 +389,6 @@ namespace TernaryTree
             return false;
         }
 
-        #endregion
-
-        #region Public Methods
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
-        public ICollection<string> MatchPattern(string pattern) => this[new TernaryTreeSearch<V>(pattern)];
-
-        public ICollection<string> MatchPrefix(string prefix)
-        {
-            List<string> keys = new List<string>();
-            Node<V> node = _getFinalNode(prefix, 0, _head);
-            _getBranchKeys(node, new StringBuilder(), keys);
-            return keys;
-        }
         #endregion
 
         #region Private Methods

@@ -55,7 +55,7 @@ namespace TernaryTree
             return matches;
         }
 
-        private void _getBranchMatches(Node<V> node, string keyBuilder, ICollection<string> matches)
+        private void _getBranchMatches(Node<V> node, string key, ICollection<string> matches)
         {
             if (_state >= _transitions.Count)
             {
@@ -64,11 +64,11 @@ namespace TernaryTree
             if (node.Smaller != null)
             {
                 TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(_transitions, _state);
-                tts._getBranchMatches(node.Smaller, keyBuilder, matches);
+                tts._getBranchMatches(node.Smaller, key, matches);
             }
-            StringBuilder oldString = new StringBuilder(keyBuilder.ToString());
+            StringBuilder oldString = new StringBuilder(key.ToString());
             int oldState = _state;
-            string newKey = keyBuilder + node.Value;
+            string newKey = key + node.Value;
             foreach (Transition transition in _transitions[_state])
             {
                 int nextState = transition.Invoke(node.Value);
@@ -88,7 +88,7 @@ namespace TernaryTree
             }
             if (node.Bigger != null)
             {
-                _getBranchMatches(node.Bigger, keyBuilder, matches);
+                _getBranchMatches(node.Bigger, key, matches);
             }
         }
 
