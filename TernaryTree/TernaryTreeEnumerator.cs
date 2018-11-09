@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 namespace TernaryTree
 {
@@ -87,42 +86,31 @@ namespace TernaryTree
             return new KeyValuePair<string, V>(_currentKey, value);
         }
 
-        private Func<string> _createStep(Node<V> node, string key)
+        private Func<string> _createStep(Node<V> node, string key) => () => 
         {
-            string f()
+            if (node.Bigger != null)
             {
-                if (node.Bigger != null)
-                {
-                    Step s = new Step(_createStep(node.Bigger, key));
-                    _nextStep.Push(s);
-                }
-                if (node.Equal != null)
-                {
-                    Step s = new Step(_createStep(node.Equal, key + node.Value));
-                    _nextStep.Push(s);
-                }
-                if (node.IsFinalNode)
-                {
-                    Step returnKey = new Step(_returnKey(key + node.Value));
-                    _nextStep.Push(returnKey);
-                }
-                if (node.Smaller != null)
-                {
-                    Step s = new Step(_createStep(node.Smaller, key));
-                    _nextStep.Push(s);
-                }
-                return default(string);
+                Step s = new Step(_createStep(node.Bigger, key));
+                _nextStep.Push(s);
             }
-            return f;
-        }
+            if (node.Equal != null)
+            {
+                Step s = new Step(_createStep(node.Equal, key + node.Value));
+                _nextStep.Push(s);
+            }
+            if (node.IsFinalNode)
+            {
+                Step returnKey = new Step(_returnKey(key + node.Value));
+                _nextStep.Push(returnKey);
+            }
+            if (node.Smaller != null)
+            {
+                Step s = new Step(_createStep(node.Smaller, key));
+                _nextStep.Push(s);
+            }
+            return default(string);
+        };
 
-        private Func<string> _returnKey(string key)
-        {
-            string f()
-            {
-                return key;
-            }
-            return f;
-        }
+        private Func<string> _returnKey(string key) => () => key;
     }
 }
