@@ -58,71 +58,45 @@ namespace TernaryTree
 
         #region Delegatees
 
-        private Func<char, int> _matchEverything(int successState)
+        private Func<char, int> _matchEverything(int successState) => (c) => successState;
+
+        private Func<char, int> _matchNothing() => (c) => -1;
+
+        private Func<char, int> _matchExact(char a, int successState) => (c) =>
         {
-            int f(char c)
+            if (c == a)
             {
                 return successState;
             }
-            return f;
-        }
-
-        private Func<char, int> _matchNothing()
-        {
-            int f(char c)
+            else
             {
                 return -1;
             }
-            return f;
-        }
+        };
 
-        private Func<char, int> _matchExact(char a, int successState)
+        private Func<char, int> _matchRange(char a, char b, int successState) => (c) =>
         {
-            int f(char c)
+            if (c >= _getMinChar(a, b) && c <= _getMaxChar(a, b))
             {
-                if (c == a)
-                {
-                    return successState;
-                }
-                else
-                {
-                    return -1;
-                }
+                return successState;
             }
-            return f;
-        }
-        
-        private Func<char, int> _matchRange(char a, char b, int successState)
-        {
-            int f(char c)
+            else
             {
-                if (c >= _getMinChar(a, b) && c <= _getMaxChar(a, b))
-                {
-                    return successState;
-                }
-                else
-                {
-                    return -1;
-                }
-            }
-            return f;
-        }
-
-        private Func<char, int> _matchAnyOf(ICollection<char> matches, int successState)
-        {
-            int f(char c)
-            {
-                foreach (char match in matches)
-                {
-                    if (c == match)
-                    {
-                        return successState;
-                    }
-                }
                 return -1;
             }
-            return f;
-        }
+        };
+
+        private Func<char, int> _matchAnyOf(ICollection<char> matches, int successState) => (c) =>
+        {
+            foreach (char match in matches)
+            {
+                if (c == match)
+                {
+                    return successState;
+                }
+            }
+            return -1;
+        };
 
         #endregion
 
