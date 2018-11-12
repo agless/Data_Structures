@@ -37,6 +37,10 @@ namespace TernaryTree
             // rigamarole.
 
             // Kick off the state building process
+            // TODO: Current state building strategy is not right.
+            // Will result in a bunch of long paths.
+            // No position in _transitions will have more than one edge.
+            // Work backwards?
             _buildState(0, pattern);
         }
 
@@ -170,10 +174,10 @@ namespace TernaryTree
             char c = pattern[pos++];
             Transition t = new Transition(_matchExact(c, _transitions.Count));
             _transitions[_state].Add(t);
-            int _oldState = _state;
+            int oldState = _state;
             _state = _transitions.Count;
             _buildState(pos, pattern);
-            _state = _oldState;
+            _state = oldState;
             return pos;
         }
 
