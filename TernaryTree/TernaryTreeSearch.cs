@@ -56,50 +56,6 @@ namespace TernaryTree
             return matches;
         }
 
-        #region Delegatees
-
-        private Func<char, int> _matchEverything(int successState) => (c) => successState;
-
-        private Func<char, int> _matchNothing() => (c) => -1;
-
-        private Func<char, int> _matchExact(char a, int successState) => (c) =>
-        {
-            if (c == a)
-            {
-                return successState;
-            }
-            else
-            {
-                return -1;
-            }
-        };
-
-        private Func<char, int> _matchRange(char a, char b, int successState) => (c) =>
-        {
-            if (c >= _getMinChar(a, b) && c <= _getMaxChar(a, b))
-            {
-                return successState;
-            }
-            else
-            {
-                return -1;
-            }
-        };
-
-        private Func<char, int> _matchAnyOf(ICollection<char> matches, int successState) => (c) =>
-        {
-            foreach (char match in matches)
-            {
-                if (c == match)
-                {
-                    return successState;
-                }
-            }
-            return -1;
-        };
-
-        #endregion
-
         #region Private Methods
 
         private TernaryTreeSearch(List<List<Transition>> transitions, int state)
@@ -232,6 +188,50 @@ namespace TernaryTree
                 return a;
             }
         }
+
+        #endregion
+
+        #region Delegatees
+
+        private Func<char, int> _matchEverything(int successState) => (c) => successState;
+
+        private Func<char, int> _matchNothing() => (c) => -1;
+
+        private Func<char, int> _matchExact(char a, int successState) => (c) =>
+        {
+            if (c == a)
+            {
+                return successState;
+            }
+            else
+            {
+                return -1;
+            }
+        };
+
+        private Func<char, int> _matchRange(char a, char b, int successState) => (c) =>
+        {
+            if (c >= _getMinChar(a, b) && c <= _getMaxChar(a, b))
+            {
+                return successState;
+            }
+            else
+            {
+                return -1;
+            }
+        };
+
+        private Func<char, int> _matchAnyOf(ICollection<char> matches, int successState) => (c) =>
+        {
+            foreach (char match in matches)
+            {
+                if (c == match)
+                {
+                    return successState;
+                }
+            }
+            return -1;
+        };
 
         #endregion
     }
