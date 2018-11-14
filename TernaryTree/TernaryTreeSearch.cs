@@ -23,18 +23,19 @@ namespace TernaryTree
             {
                 throw new ArgumentNullException(nameof(pattern));
             }
-            // Build a state machine by filling the _stateImplementations array with delegates.
-            // Need to define my delegates below so that they can be plugged in with values.
-            // Just need to provide all delegates to handle every type of transition / edge.
-            // Each state can have more than one transition, each leading to a different state.
-            //
-            // Example of how to add an edge to the state machine:
-            // Transition t = new Transition(_matchRange(pattern[0], pattern[3], 1, 0));
-            // _transitions[i].Add(t);
-            //
-            // Should account for prefix match case.  It seems more efficient to
-            // grab all keys from a prefix branch at once than to go through the state check/set
-            // rigamarole.
+            /*
+            Build a state machine by filling the _stateImplementations array with delegates.
+            Need to define my delegatees below so that they can be plugged in with values.
+            Just need to provide a delegate to handle every type of transition / edge.
+            Each state can have more than one transition, each leading to a different state.
+            
+            Should account for prefix match case.  It seems more efficient to
+            grab all keys from a prefix branch at once than to go through the state check/set
+            rigamarole.
+
+            TODO: Case insensitive mode?
+
+            */
 
             // Kick off the state building process
             _transitions = new List<List<Transition>>();
@@ -56,7 +57,7 @@ namespace TernaryTree
 
         #region Private Methods
 
-        private TernaryTreeSearch(List<List<Transition>> transitions, int state)
+        private TernaryTreeSearch(ref List<List<Transition>> transitions, int state)
         {
             _transitions = transitions;
             _state = state;
@@ -76,27 +77,25 @@ namespace TernaryTree
                     case '.':
                         pos = _handleDot(pos, pattern);
                         continue;
-                    /*
-                    TODO: Write private methods for each of these special characters.
-                    case '\\':
-                        pos = _handleEscape(pos, pattern);
-                        continue;
-                    case '^': // 
-                    case '$':
-                    case '|':
-                    case '?':
-                    case '*':
-                    case '+':
-                    case '(':
-                    case '[':
-                    case '{':
-                        // TODO: Handle grouping.
-                        // pos = _handleGroup(pos, pattern);
-                        continue;
-                    case ']':
-                    case ')':
-                    case '}':
-                    */
+                    //TODO: Write private methods for each of these special characters.
+                    //case '\\':
+                    //    pos = _handleEscape(pos, pattern);
+                    //    continue;
+                    //case '^':
+                    //case '$':
+                    //case '|':
+                    //case '?':
+                    //case '*': // This could be handled by doing lookahead on every other symbol.  Seems repetitive.
+                    //case '+':
+                    //case '(':
+                    //case '[':
+                    //case '{':
+                        //TODO: Handle grouping.
+                        //pos = _handleGroup(pos, pattern);
+                        //continue;
+                    //case ']':
+                    //case ')':
+                    //case '}':
                     default:
                         pos = _handleLiteral(pos, pattern);
                         break;
@@ -144,7 +143,7 @@ namespace TernaryTree
             }
             if (node.Smaller != null)
             {
-                TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(_transitions, _state);
+                TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(ref _transitions, _state);
                 tts._getBranchMatches(node.Smaller, key, matches);
             }
             int oldState = _state;
