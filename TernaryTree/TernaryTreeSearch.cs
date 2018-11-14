@@ -37,11 +37,9 @@ namespace TernaryTree
             // rigamarole.
 
             // Kick off the state building process
-            // TODO: Current state building strategy is not right.
-            // Will result in a bunch of long paths.
-            // No position in _transitions will have more than one edge.
-            // Work backwards?
+            _transitions = new List<List<Transition>>();
             _buildState(0, pattern);
+            _state = 0;
         }
 
         /// <summary>
@@ -69,20 +67,26 @@ namespace TernaryTree
             while (pos < pattern.Length)
             {
                 char c = pattern[pos];
+                if (_transitions.Count == _state)
+                {
+                    _transitions.Add(new List<Transition>());
+                }
                 switch (c)
                 {
+                    case '.':
+                        pos = _handleDot(pos, pattern);
+                        continue;
+                    /*
+                    TODO: Write private methods for each of these special characters.
                     case '\\':
                         pos = _handleEscape(pos, pattern);
                         continue;
-                    case '^': // TODO: Write private methods for each of these special characters.
+                    case '^': // 
                     case '$':
-                    case '.':
                     case '|':
                     case '?':
                     case '*':
                     case '+':
-                        pos = _handleLiteral(pos, pattern);
-                        continue;
                     case '(':
                     case '[':
                     case '{':
@@ -92,6 +96,7 @@ namespace TernaryTree
                     case ']':
                     case ')':
                     case '}':
+                    */
                     default:
                         pos = _handleLiteral(pos, pattern);
                         break;
@@ -103,30 +108,33 @@ namespace TernaryTree
         {
             char c = pattern[pos++];
             Transition t = new Transition(_matchExact(c, _transitions.Count));
-            _transitions[_state].Add(t);
-            int oldState = _state;
-            _state = _transitions.Count;
-            _buildState(pos, pattern);
-            _state = oldState;
+            _transitions[_state++].Add(t);
             return pos;
         }
 
-        private int _handleEscape(int pos, string pattern)
+        private int _handleDot(int pos, string pattern)
         {
-            if (pos + 1 >= pattern.Length)
-            {
-                // An escape character was passed as the last character in a string.
-                // Could just ignore?
-                // Otherwise:
-                // _handleSyntaxError()
-            }
-            else
-            {
-                // TODO: Call the right method for the escaped character.
-                // Switch statement?
-            }
-            return pos;
+            Transition t = new Transition(_matchEverything(_transitions.Count));
+            _transitions[_state++].Add(t);
+            return ++pos;
         }
+
+        //private int _handleEscape(int pos, string pattern)
+        //{
+        //    if (pos + 1 >= pattern.Length)
+        //    {
+        //        // An escape character was passed as the last character in a string.
+        //        // Could just ignore?
+        //        // Otherwise:
+        //        // _handleSyntaxError()
+        //    }
+        //    else
+        //    {
+        //        // TODO: Call the right method for the escaped character.
+        //        // Switch statement?
+        //    }
+        //    return pos;
+        //}
 
         private void _getBranchMatches(Node<V> node, string key, ICollection<string> matches)
         {
@@ -139,7 +147,6 @@ namespace TernaryTree
                 TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(_transitions, _state);
                 tts._getBranchMatches(node.Smaller, key, matches);
             }
-            StringBuilder oldString = new StringBuilder(key.ToString());
             int oldState = _state;
             string newKey = key + node.Value;
             foreach (Transition transition in _transitions[_state])

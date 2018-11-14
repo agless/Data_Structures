@@ -7,7 +7,9 @@ namespace TernaryTreeTest
 {
     [TestFixture]
     public class TernaryTreeTest
-    { 
+    {
+        #region Test Case Collections
+
         private readonly string[] _keys = new string[] { "zero", "one", "two", "three", "four" };
         private readonly string[] _sortedKeys = new string[] { "four", "one", "three", "two", "zero" };
         private readonly int[] _sortedValues = new int[] { 4, 1, 3, 2, 0 };
@@ -31,6 +33,8 @@ namespace TernaryTreeTest
             { new KeyValuePair<string, int>("three", 3) },
             { new KeyValuePair<string, int>("four", 4) }
         };
+
+        #endregion
 
         #region Static 'Constructors'
 

@@ -555,6 +555,10 @@ namespace TernaryTree
             }
         }
 
+        // TODO: Replace stringbuilder with plain string.
+        // We end up making a new string builder nearly every step anyway.
+        // Also, recursive calls allocate new copies of ints and strings (right?), so
+        // might as well make use of it by doing concatenations there.
         private void _getKeyAtIndex(Node<V> node, StringBuilder keyBuild, ref int index, out string s)
         {
             if (node.Smaller != null)
