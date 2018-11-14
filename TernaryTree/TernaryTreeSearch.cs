@@ -75,7 +75,7 @@ namespace TernaryTree
                 switch (c)
                 {
                     case '.':
-                        pos = _handleDot(pos, pattern);
+                        pos = _handleDot(pos, pattern, _checkRepeating(pos, pattern));
                         continue;
                     //TODO: Write private methods for each of these special characters.
                     //case '\\':
@@ -97,23 +97,58 @@ namespace TernaryTree
                     //case ')':
                     //case '}':
                     default:
-                        pos = _handleLiteral(pos, pattern);
+                        pos = _handleLiteral(pos, pattern, _checkRepeating(pos, pattern));
                         break;
                 }
             }
         }
 
-        private int _handleLiteral(int pos, string pattern)
+        private bool _checkRepeating(int pos, string pattern)
         {
+            if (pos < pattern.Length - 1 && pattern[pos + 1] == '*')
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private int _handleLiteral(int pos, string pattern, bool repeating)
+        {
+            int successState;
+            if (!repeating)
+            {
+                successState = _transitions.Count;
+            }
+            else
+            {
+                Transition repeat = new Transition(_matchExact(pattern[pos], _transitions.Count));
+                _transitions[_state].Add(repeat);
+                successState = _state;
+                pos++;
+            }
             char c = pattern[pos++];
-            Transition t = new Transition(_matchExact(c, _transitions.Count));
+            Transition t = new Transition(_matchExact(c, successState));
             _transitions[_state++].Add(t);
             return pos;
         }
 
-        private int _handleDot(int pos, string pattern)
+        private int _handleDot(int pos, string pattern, bool repeating)
         {
-            Transition t = new Transition(_matchEverything(_transitions.Count));
+            int successState;
+            if (!repeating)
+            {
+                successState = _transitions.Count;
+            }
+            else
+            {
+                Transition repeat = new Transition(_matchEverything(_transitions.Count));
+                successState = _state;
+                pos++;
+            }
+            Transition t = new Transition(_matchEverything(successState));
             _transitions[_state++].Add(t);
             return ++pos;
         }
@@ -168,6 +203,26 @@ namespace TernaryTree
             if (node.Bigger != null)
             {
                 _getBranchMatches(node.Bigger, key, matches);
+            }
+        }
+
+        private void _getPrefixMatches(Node<V> node, string prefix, ICollection<string> matches)
+        {
+            if (node.Smaller != null)
+            {
+                _getPrefixMatches(node, prefix, matches);
+            }
+            if (node.IsFinalNode)
+            {
+                matches.Add(prefix + node.Value);
+            }
+            if (node.Equal != null)
+            {
+                _getPrefixMatches(node.Equal, prefix + node.Value, matches);
+            }
+            if (node.Bigger != null)
+            {
+                _getPrefixMatches(node.Bigger, prefix, matches);
             }
         }
 

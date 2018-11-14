@@ -45,6 +45,20 @@ namespace TernaryTreeTest
         }
 
         [Test]
+        public void Repeating_Literal()
+        {
+            TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
+            ICollection<string> actualResult = subject[new TernaryTreeSearch<int>("thre*")];
+            string[] resultArray = new string[actualResult.Count];
+            actualResult.CopyTo(resultArray, 0);
+            Assert.Multiple(() => 
+            {
+                Assert.That(resultArray.Length, Is.EqualTo(1));
+                Assert.That(resultArray[0], Is.EqualTo("three"));
+            });
+        }
+
+        [Test]
         public void Prefix_Exact()
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
