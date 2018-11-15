@@ -20,7 +20,7 @@ namespace TernaryTree
         }
 
         /// <summary>
-        /// Returns the value associated with the current key.
+        /// Returns the current key.
         /// </summary>
         object IEnumerator.Current => _currentKey;
 

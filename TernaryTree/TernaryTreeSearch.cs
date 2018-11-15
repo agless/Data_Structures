@@ -75,7 +75,7 @@ namespace TernaryTree
                 switch (c)
                 {
                     case '.':
-                        pos = _handleDot(pos, pattern, _checkRepeating(pos, pattern));
+                        pos = _handleDot(pos, pattern);
                         continue;
                     //TODO: Write private methods for each of these special characters.
                     //case '\\':
@@ -97,7 +97,7 @@ namespace TernaryTree
                     //case ')':
                     //case '}':
                     default:
-                        pos = _handleLiteral(pos, pattern, _checkRepeating(pos, pattern));
+                        pos = _handleLiteral(pos, pattern);
                         break;
                 }
             }
@@ -115,42 +115,32 @@ namespace TernaryTree
             }
         }
 
-        private int _handleLiteral(int pos, string pattern, bool repeating)
+        private int _handleLiteral(int pos, string pattern)
         {
-            int successState;
-            if (!repeating)
+            int finalPos = pos;
+            if (_checkRepeating(pos, pattern))
             {
-                successState = _transitions.Count;
-            }
-            else
-            {
-                Transition repeat = new Transition(_matchExact(pattern[pos], _transitions.Count));
+                Transition repeat = new Transition(_matchExact(pattern[pos], _state));
                 _transitions[_state].Add(repeat);
-                successState = _state;
-                pos++;
+                finalPos++;
             }
-            char c = pattern[pos++];
-            Transition t = new Transition(_matchExact(c, successState));
+            char c = pattern[pos];
+            Transition t = new Transition(_matchExact(c, _transitions.Count));
             _transitions[_state++].Add(t);
-            return pos;
+            return ++finalPos;
         }
 
-        private int _handleDot(int pos, string pattern, bool repeating)
+        private int _handleDot(int pos, string pattern)
         {
-            int successState;
-            if (!repeating)
+            int finalPos = pos;
+            if (_checkRepeating(pos, pattern)) 
             {
-                successState = _transitions.Count;
+                Transition repeat = new Transition(_matchEverything(_state));
+                finalPos++;
             }
-            else
-            {
-                Transition repeat = new Transition(_matchEverything(_transitions.Count));
-                successState = _state;
-                pos++;
-            }
-            Transition t = new Transition(_matchEverything(successState));
+            Transition t = new Transition(_matchEverything(_transitions.Count));
             _transitions[_state++].Add(t);
-            return ++pos;
+            return finalPos;
         }
 
         //private int _handleEscape(int pos, string pattern)
