@@ -140,7 +140,7 @@ namespace TernaryTree
             }
             Transition t = new Transition(_matchEverything(_transitions.Count));
             _transitions[_state++].Add(t);
-            return finalPos;
+            return ++finalPos;
         }
 
         //private int _handleEscape(int pos, string pattern)
