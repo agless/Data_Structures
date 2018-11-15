@@ -23,21 +23,6 @@ namespace TernaryTree
             {
                 throw new ArgumentNullException(nameof(pattern));
             }
-            /*
-            Build a state machine by filling the _stateImplementations array with delegates.
-            Need to define my delegatees below so that they can be plugged in with values.
-            Just need to provide a delegate to handle every type of transition / edge.
-            Each state can have more than one transition, each leading to a different state.
-            
-            Should account for prefix match case.  It seems more efficient to
-            grab all keys from a prefix branch at once than to go through the state check/set
-            rigamarole.
-
-            TODO: Case insensitive mode?
-
-            */
-
-            // Kick off the state building process
             _transitions = new List<List<Transition>>();
             _buildState(0, pattern);
             _state = 0;
@@ -46,12 +31,12 @@ namespace TernaryTree
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="node"></param>
+        /// <param name="head"></param>
         /// <returns></returns>
-        public ICollection<string> Match(Node<V> node)
+        public ICollection<string> Match(Node<V> head)
         {
             ICollection<string> matches = new LinkedList<string>();
-            _getBranchMatches(node, default(string), matches);
+            _getBranchMatches(head, default(string), matches);
             return matches;
         }
 
@@ -78,6 +63,7 @@ namespace TernaryTree
                         pos = _handleDot(pos, pattern);
                         continue;
                     //TODO: Write private methods for each of these special characters.
+                    //TODO: Case insensitive mode?
                     //case '\\':
                     //    pos = _handleEscape(pos, pattern);
                     //    continue;
@@ -249,7 +235,7 @@ namespace TernaryTree
 
         #endregion
 
-        #region Delegatees
+        #region Delegatee Factories
 
         private Func<char, int> _matchEverything(int successState) => (c) => successState;
 
