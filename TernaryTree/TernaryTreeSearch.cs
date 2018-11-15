@@ -178,6 +178,13 @@ namespace TernaryTree
                 int nextState = transition.Invoke(node.Value);
                 if (nextState > -1)
                 {
+                    if (nextState == _transitions.Count - 1 &&
+                        nextState == oldState && 
+                        node.Equal != null)
+                    {
+                        _getPrefixMatches(node.Equal, newKey, matches);
+                        nextState++;
+                    }
                     if (nextState == _transitions.Count && node.IsFinalNode)
                     {
                         matches.Add(newKey);
