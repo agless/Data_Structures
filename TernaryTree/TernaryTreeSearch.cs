@@ -4,9 +4,6 @@ using System.Text;
 
 namespace TernaryTree
 {
-    // TODO: Need to make an object to be a regex-like state machine.
-    // Constructor takes a regex pattern and uses it to build logic for each state.  (AKA, the hard part.)
-
     public class TernaryTreeSearch<V>
     {
         private delegate int Transition(char c);
@@ -71,7 +68,7 @@ namespace TernaryTree
                     //case '$':
                     //case '|':
                     //case '?':
-                    //case '*': // This could be handled by doing lookahead on every other symbol.  Seems repetitive.
+                    //case '*':
                     //case '+':
                     //case '(':
                     //case '[':
@@ -131,23 +128,6 @@ namespace TernaryTree
             _transitions[_state++].Add(t);
             return ++finalPos;
         }
-
-        //private int _handleEscape(int pos, string pattern)
-        //{
-        //    if (pos + 1 >= pattern.Length)
-        //    {
-        //        // An escape character was passed as the last character in a string.
-        //        // Could just ignore?
-        //        // Otherwise:
-        //        // _handleSyntaxError()
-        //    }
-        //    else
-        //    {
-        //        // TODO: Call the right method for the escaped character.
-        //        // Switch statement?
-        //    }
-        //    return pos;
-        //}
 
         private void _getBranchMatches(Node<V> node, string key, ICollection<string> matches)
         {
@@ -238,7 +218,7 @@ namespace TernaryTree
 
         #endregion
 
-        #region Delegatee Factories
+        #region Delegate Factories
 
         private Func<char, int> _matchEverything(int successState) => (c) => successState;
 
