@@ -68,7 +68,10 @@ namespace TernaryTree
                     //case '$':
                     //case '|':
                     //case '?':
-                    //case '*':
+                    //case '*': 
+                        // Add a transition for pos - 1 to this state.  
+                        // Add a transition for pos + 1 to state - 1.  
+                        // Remove the check repeating stuff below.
                     //case '+':
                     //case '(':
                     //case '[':
@@ -108,6 +111,12 @@ namespace TernaryTree
                 Transition repeat = new Transition(_matchExact(pattern[pos], _state));
                 _transitions[_state].Add(repeat);
                 finalPos++;
+
+                // TODO: This would be the place to add a transition for zero occurences when repeating.
+                // Check that there's another character in pattern, and then add a match for it.
+                // Don't forget to update finalPos again.
+                // I guess we need to make a recursive call here?
+                // Then go back to 'oldState' and continue this call.
             }
             char c = pattern[pos];
             Transition t = new Transition(_matchExact(c, _transitions.Count));
@@ -147,6 +156,12 @@ namespace TernaryTree
                 int nextState = transition.Invoke(node.Value);
                 if (nextState > -1)
                 {
+                    // TODO: Also check for repeating state that's not final state (aka, a prefix match).
+                    // Put the _transitions.Count - 1 check inside the check for the other two.
+                    // If it's a prefix match, call prefix.
+                    // Else call a method that can handle a repeating match in a straight line without
+                    // worrying about advancing state until it finds the right character for the next state.
+                    // (But can we even get that character here?)
                     if (nextState == _transitions.Count - 1 &&
                         nextState == oldState && 
                         node.Equal != null)
