@@ -93,20 +93,18 @@ namespace TernaryTreeTest
             });
         }
 
-        [Test]
-        public void Contains_Exact()
+        [TestCase(".*a.*", "fjfjfjfjfjfjafjfjfjfjfj")]
+        public void Contains_Exact(string pattern, string matchingKey)
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
-            ICollection<string> actualResult = subject[new TernaryTreeSearch<int>(".*o.*")];
+            subject.Add(matchingKey);
+            ICollection<string> actualResult = subject.Match(pattern);
             string[] resultArray = new string[actualResult.Count];
             actualResult.CopyTo(resultArray, 0);
-            Assert.Multiple(() => 
+            Assert.Multiple(() =>
             {
-                Assert.That(resultArray.Length, Is.EqualTo(4));
-                Assert.That(resultArray[0], Is.EqualTo("four"));
-                Assert.That(resultArray[1], Is.EqualTo("one"));
-                Assert.That(resultArray[2], Is.EqualTo("two"));
-                Assert.That(resultArray[3], Is.EqualTo("zero"));
+                Assert.That(resultArray.Length, Is.EqualTo(1));
+                Assert.That(resultArray[0], Is.EqualTo(matchingKey));
             });
         }
     }

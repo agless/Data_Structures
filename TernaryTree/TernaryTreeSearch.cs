@@ -91,6 +91,8 @@ namespace TernaryTree
 
         private bool _checkRepeating(int pos, string pattern)
         {
+            // TODO: Does repeating mean _zero_ or more instances?
+            // If so, I'm doing it wrong.
             if (pos < pattern.Length - 1 && pattern[pos + 1] == '*')
             {
                 return true;
