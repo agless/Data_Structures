@@ -37,24 +37,44 @@ namespace TernaryTreeTest
             ICollection<string> actualResult = subject[new TernaryTreeSearch<int>("o.e")];
             string[] resultArray = new string[actualResult.Count];
             actualResult.CopyTo(resultArray, 0);
-            Assert.Multiple(() => 
+            Assert.Multiple(() =>
             {
                 Assert.That(resultArray.Length, Is.EqualTo(1));
                 Assert.That(resultArray[0], Is.EqualTo("one"));
             });
         }
 
-        [Test]
-        public void Repeating_Literal()
+        [TestCase("ab*a", "abbbbbba")]
+        [TestCase("a*b", "aaaaaaaab")]
+        [TestCase("ab*", "abbbbbbbb")]
+        public void Repeating_Literal(string pattern, string matchingKey)
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
-            ICollection<string> actualResult = subject[new TernaryTreeSearch<int>("thre*")];
+            subject.Add(matchingKey);
+            ICollection<string> actualResult = subject[new TernaryTreeSearch<int>(pattern)];
+            string[] resultArray = new string[actualResult.Count];
+            actualResult.CopyTo(resultArray, 0);
+            Assert.Multiple(() =>
+            {
+                Assert.That(resultArray.Length, Is.EqualTo(1));
+                Assert.That(resultArray[0], Is.EqualTo(matchingKey));
+            });
+        }
+
+        [TestCase("a.*a", "afjfjfjfjfjfjfjfjfjfjfja")]
+        [TestCase(".*a", "jfjfjfjfjfjfjfjfjfjfjfjfja")]
+        [TestCase("a.*", "afjfjfjfjfjfjfjfjfjfjfjfjfjfj")]
+        public void Repeating_Dot(string pattern, string matchingKey)
+        {
+            TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
+            subject.Add(matchingKey);
+            ICollection<string> actualResult = subject.Match(pattern);
             string[] resultArray = new string[actualResult.Count];
             actualResult.CopyTo(resultArray, 0);
             Assert.Multiple(() => 
             {
                 Assert.That(resultArray.Length, Is.EqualTo(1));
-                Assert.That(resultArray[0], Is.EqualTo("three"));
+                Assert.That(resultArray[0], Is.EqualTo(matchingKey));
             });
         }
 

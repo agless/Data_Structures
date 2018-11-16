@@ -122,6 +122,7 @@ namespace TernaryTree
             if (_checkRepeating(pos, pattern)) 
             {
                 Transition repeat = new Transition(_matchEverything(_state));
+                _transitions[_state].Add(repeat);
                 finalPos++;
             }
             Transition t = new Transition(_matchEverything(_transitions.Count));
