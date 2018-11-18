@@ -56,6 +56,7 @@ namespace TernaryTreeTest
         [TestCase("a*b", "aaaaaaaab")]
         [TestCase("ab*", "abbbbbbbb")]
         [TestCase("ab*c", "ac")]
+        [TestCase("ab*", "a")]
         public void Repeating_Literal(string pattern, string expectedResult)
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);

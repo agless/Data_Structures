@@ -47,8 +47,6 @@ namespace TernaryTree
 
         private void _buildState(int pos, string pattern)
         {
-            // Maybe it would be easier to start by making a stack of symbols,
-            // Then pop them one at a time and build state?
             while (pos < pattern.Length)
             {
                 char c = pattern[pos];
@@ -156,22 +154,21 @@ namespace TernaryTree
                 int nextState = transition.Invoke(node.Value);
                 if (nextState > -1)
                 {
+                    // TODO: Get efficient prefix match working.
                     // TODO: Also check for repeating state that's not final state (aka, a prefix match).
                     // Put the _transitions.Count - 1 check inside the check for the other two.
                     // If it's a prefix match, call prefix.
                     // Else call a method that can handle a repeating match in a straight line without
                     // worrying about advancing state until it finds the right character for the next state.
                     // (But can we even get that character here?)
-                    if (nextState == _transitions.Count - 1 &&
-                        nextState == oldState && 
-                        node.Equal != null)
-                    {
-                        _getPrefixMatches(node.Equal, newKey, matches);
-                        continue;
-                    }
-                    if (nextState == _transitions.Count && 
-                        nextState != oldState &&
-                        node.IsFinalNode)
+                    //if (nextState == _transitions.Count - 1 &&
+                    //    nextState == oldState && 
+                    //    node.Equal != null)
+                    //{
+                    //    _getPrefixMatches(node.Equal, newKey, matches);
+                    //    continue;
+                    //}
+                    if (nextState == _transitions.Count && node.IsFinalNode)
                     {
                         matches.Add(newKey);
                     }
