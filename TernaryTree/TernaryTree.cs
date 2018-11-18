@@ -7,7 +7,7 @@ namespace TernaryTree
 {
     // TODO: Logging?
     // TODO: Error Handling and Documentation.  Follow Microsoft lead with interfaces.
-    // TODO: Unit tests.
+    // TODO: More unit tests.  Check line coverage.
     // TODO: What if you try to add a string with whitespace or line-ending characters?
     // TODO: If we stored a KeyValuePair at Node.Data, we could do away with all the string building.
 
@@ -169,7 +169,7 @@ namespace TernaryTree
         /// 
         /// </summary>
         /// <param name="pattern">A regular expression to match.</param>
-        /// <returns></returns>
+        /// <returns>A collection of keys matching the regular expression.</returns>
         public ICollection<string> Match(string pattern)
         {
             TernaryTreeSearch<V> search = new TernaryTreeSearch<V>(pattern);
@@ -179,8 +179,16 @@ namespace TernaryTree
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="prefix">The prefix to search.</param>
-        /// <returns></returns>
+        /// <param name="pattern">A <see cref="TernaryTreeSearch{V}"/> 
+        /// which has been configured to match a regular expression.</param>
+        /// <returns>A collection of keys matchig the regular expression.</returns>
+        public ICollection<string> Match(TernaryTreeSearch<V> pattern) => pattern.Match(_head);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="prefix">The prefix to match.</param>
+        /// <returns>A collection of keys matching the prefix.</returns>
         public ICollection<string> MatchPrefix(string prefix)
         {
             List<string> keys = new List<string>();

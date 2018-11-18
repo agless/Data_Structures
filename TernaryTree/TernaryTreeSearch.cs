@@ -116,15 +116,18 @@ namespace TernaryTree
         // TODO: Fix star repeating
         private int _handleStar(int pos, string pattern)
         {
+            // TODO: There needs to be a transition from last symbol to next symbol in order to account for zero instances of the repeating symbol.
+            
             // The current last spot for transitions (which is also currently empty) shouldn't count for purposes of final state 
             _transitions.RemoveAt(_state); 
             if (pos + 1 < pattern.Length)
             {
-                // If there's more to match, then the previous match shouldn't transition to final state
+                // If there's more pattern to match, then the repeating match shouldn't transition forward.
+                // (It should only loop - which is added below.)
                 _transitions[_transitions.Count - 1].RemoveAt(_transitions[_transitions.Count - 1].Count - 1);
             }
+            // the previous transition should loop back to it's own state
             _state--;
-            // the previous transition should loop back to same state
             _switchNextSymbol(0, _lastSymbol, _state);
             if (pos + 1 < pattern.Length)
             {
@@ -206,30 +209,6 @@ namespace TernaryTree
             }
         }
 
-        private char _getMinChar(char a, char b)
-        {
-            if (a <= b)
-            {
-                return a;
-            }
-            else
-            {
-                return b;
-            }
-        }
-
-        private char _getMaxChar(char a, char b)
-        {
-            if (a <= b)
-            {
-                return b;
-            }
-            else
-            {
-                return a;
-            }
-        }
-
         #endregion
 
         #region Delegate Factories
@@ -273,6 +252,30 @@ namespace TernaryTree
             }
             return -1;
         };
+
+        private char _getMinChar(char a, char b)
+        {
+            if (a <= b)
+            {
+                return a;
+            }
+            else
+            {
+                return b;
+            }
+        }
+
+        private char _getMaxChar(char a, char b)
+        {
+            if (a <= b)
+            {
+                return b;
+            }
+            else
+            {
+                return a;
+            }
+        }
 
         #endregion
     }
