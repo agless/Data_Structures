@@ -55,11 +55,12 @@ namespace TernaryTreeTest
         [TestCase("ab*a", "abbbbbba")]
         [TestCase("a*b", "aaaaaaaab")]
         [TestCase("ab*", "abbbbbbbb")]
+        [TestCase("ab*c", "ac")]
         public void Repeating_Literal(string pattern, string expectedResult)
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
             subject.Add(expectedResult);
-            ICollection<string> actualResult = subject[new TernaryTreeSearch<int>(pattern)];
+            ICollection<string> actualResult = subject.Match(pattern);
             string[] resultArray = new string[actualResult.Count];
             actualResult.CopyTo(resultArray, 0);
             Assert.Multiple(() =>
@@ -72,6 +73,8 @@ namespace TernaryTreeTest
         [TestCase("a.*a", "abbbcbcccbcbcbbbcccbba")]
         [TestCase(".*a", "bcbcccbcbcbbbcbcbcccbcbbbbcbcbcba")]
         [TestCase("a.*", "abcbcbcbcbcbcbcbcbcbbcccbcbcbccbbbcbc")]
+        [TestCase("a.*", "a")]
+        [TestCase("a.*c", "ac")]
         public void Repeating_Dot(string pattern, string expectedResult)
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
@@ -79,7 +82,7 @@ namespace TernaryTreeTest
             ICollection<string> actualResult = subject.Match(pattern);
             string[] resultArray = new string[actualResult.Count];
             actualResult.CopyTo(resultArray, 0);
-            Assert.Multiple(() => 
+            Assert.Multiple(() =>
             {
                 Assert.That(resultArray.Length, Is.EqualTo(1));
                 Assert.That(resultArray[0], Is.EqualTo(expectedResult));
@@ -90,7 +93,7 @@ namespace TernaryTreeTest
         public void Prefix_Exact()
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
-            ICollection<string> actualResult = subject[new TernaryTreeSearch<int>("t.*")];
+            ICollection<string> actualResult = subject.Match("t.*");
             string[] resultArray = new string[actualResult.Count];
             actualResult.CopyTo(resultArray, 0);
             Assert.Multiple(() => 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace TernaryTree
 {
@@ -9,6 +8,7 @@ namespace TernaryTree
         private delegate int Transition(char c);
         private List<List<Transition>> _transitions;
         private int _state;
+        private string _lastSymbol;
 
         /// <summary>
         /// 
@@ -47,95 +47,95 @@ namespace TernaryTree
 
         private void _buildState(int pos, string pattern)
         {
+            // Maybe it would be easier to start by making a stack of symbols,
+            // Then pop them one at a time and build state?
             while (pos < pattern.Length)
             {
                 char c = pattern[pos];
-                if (_transitions.Count == _state)
+                while (_transitions.Count <= _state)
                 {
                     _transitions.Add(new List<Transition>());
                 }
-                switch (c)
-                {
-                    case '.':
-                        pos = _handleDot(pos, pattern);
-                        continue;
-                    //TODO: Write private methods for each of these special characters.
-                    //TODO: Case insensitive mode?
-                    //case '\\':
-                    //    pos = _handleEscape(pos, pattern);
-                    //    continue;
-                    //case '^':
-                    //case '$':
-                    //case '|':
-                    //case '?':
-                    //case '*': 
-                        // Add a transition for pos - 1 to this state.  
-                        // Add a transition for pos + 1 to state - 1.  
-                        // Remove the check repeating stuff below.
-                    //case '+':
-                    //case '(':
-                    //case '[':
-                    //case '{':
-                        //TODO: Handle grouping.
-                        //pos = _handleGroup(pos, pattern);
-                        //continue;
-                    //case ']':
-                    //case ')':
-                    //case '}':
-                    default:
-                        pos = _handleLiteral(pos, pattern);
-                        break;
-                }
+                pos = _switchNextSymbol(pos, pattern, _transitions.Count);
+                _state++;
             }
         }
 
-        private bool _checkRepeating(int pos, string pattern)
+        private int _switchNextSymbol(int pos, string pattern, int successState)
         {
-            // TODO: Does repeating mean _zero_ or more instances?
-            // If so, I'm doing it wrong.
-            if (pos < pattern.Length - 1 && pattern[pos + 1] == '*')
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private int _handleLiteral(int pos, string pattern)
-        {
-            int finalPos = pos;
-            if (_checkRepeating(pos, pattern))
-            {
-                Transition repeat = new Transition(_matchExact(pattern[pos], _state));
-                _transitions[_state].Add(repeat);
-                finalPos++;
-
-                // TODO: This would be the place to add a transition for zero occurences when repeating.
-                // Check that there's another character in pattern, and then add a match for it.
-                // Don't forget to update finalPos again.
-                // I guess we need to make a recursive call here?
-                // Then go back to 'oldState' and continue this call.
-            }
             char c = pattern[pos];
-            Transition t = new Transition(_matchExact(c, _transitions.Count));
-            _transitions[_state++].Add(t);
-            return ++finalPos;
+            switch (c)
+            {
+                case '.':
+                    pos = _handleDot(pos, pattern, successState);
+                    break;
+                //TODO: Write private methods for each of these special characters.
+                //TODO: Case insensitive mode?
+                //case '\\':
+                //    pos = _handleEscape(pos, pattern);
+                //    continue;
+                //case '^':
+                //case '$':
+                //case '|':
+                //case '?':
+                case '*':
+                    pos = _handleStar(pos, pattern);
+                    break;
+                //case '+':
+                //case '(':
+                //case '[':
+                //case '{':
+                //TODO: Handle grouping.
+                //pos = _handleGroup(pos, pattern);
+                //continue;
+                //case ']':
+                //case ')':
+                //case '}':
+                default:
+                    pos = _handleLiteral(pos, pattern, successState);
+                    break;
+            }
+            return pos;
         }
 
-        private int _handleDot(int pos, string pattern)
+        private int _handleLiteral(int pos, string pattern, int successState)
         {
-            int finalPos = pos;
-            if (_checkRepeating(pos, pattern)) 
+            char c = pattern[pos];
+            _lastSymbol = c.ToString();
+            Transition t = new Transition(_matchExact(c, successState));
+            _transitions[_state].Add(t);
+            return ++pos;
+        }
+
+        private int _handleDot(int pos, string pattern, int successState)
+        {
+            _lastSymbol = ".";
+            Transition t = new Transition(_matchEverything(successState));
+            _transitions[_state].Add(t);
+            return ++pos;
+        }
+
+        // TODO: Fix star repeating
+        private int _handleStar(int pos, string pattern)
+        {
+            // The current last spot for transitions (which is also currently empty) shouldn't count for purposes of final state 
+            _transitions.RemoveAt(_state); 
+            if (pos + 1 < pattern.Length)
             {
-                Transition repeat = new Transition(_matchEverything(_state));
-                _transitions[_state].Add(repeat);
-                finalPos++;
+                // If there's more to match, then the previous match shouldn't transition to final state
+                _transitions[_transitions.Count - 1].RemoveAt(_transitions[_transitions.Count - 1].Count - 1);
             }
-            Transition t = new Transition(_matchEverything(_transitions.Count));
-            _transitions[_state++].Add(t);
-            return ++finalPos;
+            _state--;
+            // the previous transition should loop back to same state
+            _switchNextSymbol(0, _lastSymbol, _state);
+            if (pos + 1 < pattern.Length)
+            {
+                // If there's more to match, then add a transition for the next symbol here
+                // (match zero or more of the repeating symbol)
+                pos = _switchNextSymbol(pos + 1, pattern, _transitions.Count);
+                return pos;
+            }
+            return ++pos;
         }
 
         private void _getBranchMatches(Node<V> node, string key, ICollection<string> matches)
@@ -167,9 +167,11 @@ namespace TernaryTree
                         node.Equal != null)
                     {
                         _getPrefixMatches(node.Equal, newKey, matches);
-                        nextState++;
+                        continue;
                     }
-                    if (nextState == _transitions.Count && node.IsFinalNode)
+                    if (nextState == _transitions.Count && 
+                        nextState != oldState &&
+                        node.IsFinalNode)
                     {
                         matches.Add(newKey);
                     }
