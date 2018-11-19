@@ -208,7 +208,7 @@ namespace TernaryTree
         {
             if (node.Smaller != null)
             {
-                _getPrefixMatches(node, prefix);
+                _getPrefixMatches(node.Smaller, prefix);
             }
             if (node.IsFinalNode)
             {
