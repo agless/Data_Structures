@@ -37,7 +37,7 @@ namespace TernaryTreeTest
         [TestCase(".ero", "zero")]
         [TestCase("o.e", "one")]
         [TestCase(".w.", "two")]
-        [TestCase("t.r.e", "three")]
+        [TestCase("t...e", "three")]
         [TestCase("f...", "four")]
         public void Wildcard_Match(string pattern, string expectedResult)
         {

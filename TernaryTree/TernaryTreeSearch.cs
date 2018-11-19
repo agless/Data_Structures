@@ -5,10 +5,11 @@ namespace TernaryTree
 {
     public class TernaryTreeSearch<V>
     {
-        private delegate int Transition(char c);
+        private delegate int Transition(Node<V> node, string key);
         private List<List<Transition>> _transitions;
         private int _state;
         private string _lastSymbol;
+        private List<string> _matches;
 
         /// <summary>
         /// 
@@ -22,6 +23,7 @@ namespace TernaryTree
             }
             _transitions = new List<List<Transition>>();
             _buildState(0, pattern);
+            _matches = new List<string>();
             _state = 0;
         }
 
@@ -32,17 +34,17 @@ namespace TernaryTree
         /// <returns></returns>
         public ICollection<string> Match(Node<V> head)
         {
-            ICollection<string> matches = new LinkedList<string>();
-            _getBranchMatches(head, default(string), matches);
-            return matches;
+            _getBranchMatches(head, default(string));
+            return _matches;
         }
 
         #region Private Methods
 
-        private TernaryTreeSearch(ref List<List<Transition>> transitions, int state)
+        private TernaryTreeSearch(ref List<List<Transition>> transitions, ref List<string> matches, int state)
         {
             _transitions = transitions;
             _state = state;
+            _matches = matches;
         }
 
         private void _buildState(int pos, string pattern)
@@ -116,14 +118,25 @@ namespace TernaryTree
         // TODO: Fix star repeating
         private int _handleStar(int pos, string pattern)
         {
-            // TODO: There needs to be a transition from last symbol to next symbol in order to account for zero instances of the repeating symbol.
-            
+            // If the last symbol is a repeating dot, add a prefix match decorator to all transitions in the previous state
+            if (pos == pattern.Length - 1 &&
+                pattern[pos - 1] == '.' &&
+                pos > 1)
+            {
+                for (int i = 0; i < _transitions[_state - 2].Count; i++)
+                {
+                    Transition t = _transitions[_state - 2][i];
+                    t = new Transition(_prefixMatchDecorator(t));
+                }
+            }
             // The current last spot for transitions (which is also currently empty) shouldn't count for purposes of final state 
             _transitions.RemoveAt(_state); 
             if (pos + 1 < pattern.Length)
             {
                 // If there's more pattern to match, then the repeating match shouldn't transition forward.
                 // (It should only loop - which is added below.)
+                // TODO: Instead of doing this finicky delete, is some way to just decorate the other transitions so that they return a different result?
+                // See the prefix match decorator used above.
                 _transitions[_transitions.Count - 1].RemoveAt(_transitions[_transitions.Count - 1].Count - 1);
             }
             // the previous transition should loop back to it's own state
@@ -139,7 +152,7 @@ namespace TernaryTree
             return ++pos;
         }
 
-        private void _getBranchMatches(Node<V> node, string key, ICollection<string> matches)
+        private void _getBranchMatches(Node<V> node, string key)
         {
             if (_state >= _transitions.Count)
             {
@@ -147,14 +160,14 @@ namespace TernaryTree
             }
             if (node.Smaller != null)
             {
-                TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(ref _transitions, _state);
-                tts._getBranchMatches(node.Smaller, key, matches);
+                TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(ref _transitions, ref _matches, _state);
+                tts._getBranchMatches(node.Smaller, key);
             }
             int oldState = _state;
             string newKey = key + node.Value;
             foreach (Transition transition in _transitions[_state])
             {
-                int nextState = transition.Invoke(node.Value);
+                int nextState = transition.Invoke(node, key);
                 if (nextState > -1)
                 {
                     // TODO: Get efficient prefix match working.
@@ -173,39 +186,39 @@ namespace TernaryTree
                     //}
                     if (nextState == _transitions.Count && node.IsFinalNode)
                     {
-                        matches.Add(newKey);
+                        _matches.Add(newKey);
                     }
                     if (nextState < _transitions.Count && node.Equal != null)
                     {
                         _state = nextState;
-                        _getBranchMatches(node.Equal, newKey, matches);
+                        _getBranchMatches(node.Equal, newKey);
                         _state = oldState;
                     }
                 }
             }
             if (node.Bigger != null)
             {
-                _getBranchMatches(node.Bigger, key, matches);
+                _getBranchMatches(node.Bigger, key);
             }
         }
 
-        private void _getPrefixMatches(Node<V> node, string prefix, ICollection<string> matches)
+        private void _getPrefixMatches(Node<V> node, string prefix)
         {
             if (node.Smaller != null)
             {
-                _getPrefixMatches(node, prefix, matches);
+                _getPrefixMatches(node, prefix);
             }
             if (node.IsFinalNode)
             {
-                matches.Add(prefix + node.Value);
+                _matches.Add(prefix + node.Value);
             }
             if (node.Equal != null)
             {
-                _getPrefixMatches(node.Equal, prefix + node.Value, matches);
+                _getPrefixMatches(node.Equal, prefix + node.Value);
             }
             if (node.Bigger != null)
             {
-                _getPrefixMatches(node.Bigger, prefix, matches);
+                _getPrefixMatches(node.Bigger, prefix);
             }
         }
 
@@ -213,13 +226,33 @@ namespace TernaryTree
 
         #region Delegate Factories
 
-        private Func<char, int> _matchEverything(int successState) => (c) => successState;
-
-        private Func<char, int> _matchNothing() => (c) => -1;
-
-        private Func<char, int> _matchExact(char a, int successState) => (c) =>
+        // TODO: get prefix match decorator working
+        private Func<Node<V>, string, int> _prefixMatchDecorator(Transition t) => (node, key) =>
         {
-            if (c == a)
+            int newState = t.Invoke(node, key);
+            if (newState > -1)
+            {
+                if (node.IsFinalNode)
+                {
+                    _matches.Add(key + node.Value);
+                }
+                if (node.Equal != null)
+                {
+                    _getPrefixMatches(node.Equal, key + node.Value);
+                }
+                // We just did the whole branch in one go.  No need to explore further.
+                return -1;
+            }
+            return newState;
+        };
+
+        private Func<Node<V>, string, int> _matchEverything(int successState) => (node, key) => successState;
+
+        private Func<Node<V>, string, int> _matchNothing() => (node, key) => -1;
+
+        private Func<Node<V>, string, int> _matchExact(char a, int successState) => (node, key) =>
+        {
+            if (node.Value == a)
             {
                 return successState;
             }
@@ -229,9 +262,9 @@ namespace TernaryTree
             }
         };
 
-        private Func<char, int> _matchRange(char a, char b, int successState) => (c) =>
+        private Func<Node<V>, string, int> _matchRange(char a, char b, int successState) => (node, key) =>
         {
-            if (c >= _getMinChar(a, b) && c <= _getMaxChar(a, b))
+            if (node.Value >= _getMinChar(a, b) && node.Value <= _getMaxChar(a, b))
             {
                 return successState;
             }
@@ -241,11 +274,11 @@ namespace TernaryTree
             }
         };
 
-        private Func<char, int> _matchAnyOf(ICollection<char> matches, int successState) => (c) =>
+        private Func<Node<V>, string, int> _matchAnyOf(ICollection<char> matchingChars, int successState) => (node, key) =>
         {
-            foreach (char match in matches)
+            foreach (char match in matchingChars)
             {
-                if (c == match)
+                if (node.Value == match)
                 {
                     return successState;
                 }
