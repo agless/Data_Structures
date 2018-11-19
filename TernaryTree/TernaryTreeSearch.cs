@@ -126,7 +126,7 @@ namespace TernaryTree
                 for (int i = 0; i < _transitions[_state - 2].Count; i++)
                 {
                     Transition t = _transitions[_state - 2][i];
-                    t = new Transition(_prefixMatchDecorator(t));
+                    _transitions[_state - 2][i] = new Transition(_prefixMatchDecorator(t));
                 }
             }
             // The current last spot for transitions (which is also currently empty) shouldn't count for purposes of final state 
@@ -139,6 +139,8 @@ namespace TernaryTree
                 // See the prefix match decorator used above.
                 _transitions[_transitions.Count - 1].RemoveAt(_transitions[_transitions.Count - 1].Count - 1);
             }
+            // TODO: Can we add the loop state with a decorator instead?
+            // Could have loop plus advance and loop without advance decorators.
             // the previous transition should loop back to it's own state
             _state--;
             _switchNextSymbol(0, _lastSymbol, _state);
