@@ -5,6 +5,8 @@ namespace TernaryTree
 {
     public class TernaryTreeSearch<V>
     {
+        // TODO: Detect / Throw syntax errors.
+
         private delegate int Transition(Node<V> node, string key);
         private List<List<Transition>> _transitions;
         private int _state;
@@ -116,24 +118,23 @@ namespace TernaryTree
         // TODO: Fix star repeating
         private int _handleStar(int pos, string pattern)
         {
-            // If the last symbol is repeating, add an appropriate decorator to all transitions in the previous state.
+            // If the last symbol is repeating, add an appropriate decorator to all transitions out of the preceding state.
             // TODO: Is there a risk of double-adding keys here?  (i.e. more than one run down the same branch)
-            if (pos == pattern.Length - 1 &&
-                pos > 1)
+            if (pos == pattern.Length - 1 && pos > 1)
             {
                 for (int i = 0; i < _transitions[_state - 2].Count; i++)
                 {
                     if (pattern[pos - 1] == '.')
                     {
-                        // use the more efficient function to traverse the branch
-                        Transition t = _transitions[_state - 2][i];
-                        _transitions[_state - 2][i] = new Transition(_prefixMatchDecorator(t));
+                        // use the more efficient prefix match function to traverse the branch
+                        _transitions[_state - 2][i] = new Transition(
+                            _prefixMatchDecorator(_transitions[_state - 2][i]));
                     }
                     else
                     {
-                        // match zero or more instances
-                        Transition t = _transitions[_state - 2][i];
-                        _transitions[_state - 2][i] = new Transition(_checkValidKeyDecorator(t));
+                        // match _zero_ or more instances of the repeating character
+                        _transitions[_state - 2][i] = new Transition(
+                            _checkValidKeyDecorator(_transitions[_state - 2][i]));
                     }
                 }
             }
@@ -293,29 +294,9 @@ namespace TernaryTree
             return -1;
         };
 
-        private char _getMinChar(char a, char b)
-        {
-            if (a <= b)
-            {
-                return a;
-            }
-            else
-            {
-                return b;
-            }
-        }
+        private char _getMinChar(char a, char b) => a <= b ? a : b;
 
-        private char _getMaxChar(char a, char b)
-        {
-            if (a <= b)
-            {
-                return b;
-            }
-            else
-            {
-                return a;
-            }
-        }
+        private char _getMaxChar(char a, char b) => a <= b ? b : a;
 
         #endregion
     }
