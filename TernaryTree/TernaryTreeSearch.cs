@@ -102,31 +102,39 @@ namespace TernaryTree
         {
             char c = pattern[pos];
             _lastSymbol = c.ToString();
-            Transition t = new Transition(_matchExact(c, successState));
-            _transitions[_state].Add(t);
+            _transitions[_state].Add(new Transition(_matchExact(c, successState)));
             return ++pos;
         }
 
         private int _handleDot(int pos, string pattern, int successState)
         {
             _lastSymbol = ".";
-            Transition t = new Transition(_matchEverything(successState));
-            _transitions[_state].Add(t);
+            _transitions[_state].Add(new Transition(_matchEverything(successState)));
             return ++pos;
         }
 
         // TODO: Fix star repeating
         private int _handleStar(int pos, string pattern)
         {
-            // If the last symbol is a repeating dot, add a prefix match decorator to all transitions in the previous state
+            // If the last symbol is repeating, add an appropriate decorator to all transitions in the previous state.
+            // TODO: Is there a risk of double-adding keys here?  (i.e. more than one run down the same branch)
             if (pos == pattern.Length - 1 &&
-                pattern[pos - 1] == '.' &&
                 pos > 1)
             {
                 for (int i = 0; i < _transitions[_state - 2].Count; i++)
                 {
-                    Transition t = _transitions[_state - 2][i];
-                    _transitions[_state - 2][i] = new Transition(_prefixMatchDecorator(t));
+                    if (pattern[pos - 1] == '.')
+                    {
+                        // use the more efficient function to traverse the branch
+                        Transition t = _transitions[_state - 2][i];
+                        _transitions[_state - 2][i] = new Transition(_prefixMatchDecorator(t));
+                    }
+                    else
+                    {
+                        // match zero or more instances
+                        Transition t = _transitions[_state - 2][i];
+                        _transitions[_state - 2][i] = new Transition(_checkValidKeyDecorator(t));
+                    }
                 }
             }
             // The current last spot for transitions (which is also currently empty) shouldn't count for purposes of final state 
@@ -154,6 +162,8 @@ namespace TernaryTree
             return ++pos;
         }
 
+        // TODO: Should _state actually just be a parameter of this method instead of a field?
+        // Would also have to be a parameter of the state builder method.  Could make things easier, though.
         private void _getBranchMatches(Node<V> node, string key)
         {
             if (_state >= _transitions.Count)
@@ -162,6 +172,7 @@ namespace TernaryTree
             }
             if (node.Smaller != null)
             {
+                // TODO: Why construct a new object here?  Why not just go down the branch recursively and restore oldState after?
                 TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(ref _transitions, ref _matches, _state);
                 tts._getBranchMatches(node.Smaller, key);
             }
@@ -172,20 +183,6 @@ namespace TernaryTree
                 int nextState = transition.Invoke(node, key);
                 if (nextState > -1)
                 {
-                    // TODO: Get efficient prefix match working.
-                    // TODO: Also check for repeating state that's not final state (aka, a prefix match).
-                    // Put the _transitions.Count - 1 check inside the check for the other two.
-                    // If it's a prefix match, call prefix.
-                    // Else call a method that can handle a repeating match in a straight line without
-                    // worrying about advancing state until it finds the right character for the next state.
-                    // (But can we even get that character here?)
-                    //if (nextState == _transitions.Count - 1 &&
-                    //    nextState == oldState && 
-                    //    node.Equal != null)
-                    //{
-                    //    _getPrefixMatches(node.Equal, newKey, matches);
-                    //    continue;
-                    //}
                     if (nextState == _transitions.Count && node.IsFinalNode)
                     {
                         _matches.Add(newKey);
@@ -228,7 +225,6 @@ namespace TernaryTree
 
         #region Delegate Factories
 
-        // TODO: get prefix match decorator working
         private Func<Node<V>, string, int> _prefixMatchDecorator(Transition t) => (node, key) =>
         {
             int newState = t.Invoke(node, key);
@@ -246,6 +242,15 @@ namespace TernaryTree
                 return -1;
             }
             return newState;
+        };
+
+        private Func<Node<V>, string, int> _checkValidKeyDecorator(Transition t) => (node, key) => 
+        {
+            if (node.IsFinalNode)
+            {
+                _matches.Add(key + node.Value);
+            }
+            return t.Invoke(node, key);
         };
 
         private Func<Node<V>, string, int> _matchEverything(int successState) => (node, key) => successState;

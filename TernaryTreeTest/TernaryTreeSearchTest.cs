@@ -106,6 +106,8 @@ namespace TernaryTreeTest
         }
 
         [TestCase(".*a.*", "bbbbbbbbbbbbbbbacccccccccccccc")]
+        [TestCase(".*test_case.*", "this can be anything __ test_case ___ ")]
+        [TestCase(".*first.*second.*third.*", "xxx_first_xxx_second_xxx_third_xxx")]
         public void Contains_Exact(string pattern, string matchingKey)
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
