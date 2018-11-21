@@ -118,6 +118,10 @@ namespace TernaryTree
         // TODO: Fix star repeating
         private int _handleStar(int pos, string pattern)
         {
+            // TODO: Throw some kind of syntax error (ArgumentException?) if star is in the first position.  (There's nothing to repeat.)
+            // TODO: Throw some kind of syntax error (ArgumentException?) if star follows star.  (There's nothing to repeat)
+            // ^^Careful - don't throw if it's matching a literal '*'.  Check for escape character preceding that.
+            
             // If the last symbol is repeating, add an appropriate decorator to all transitions out of the preceding state.
             // TODO: Is there a risk of double-adding keys here?  (i.e. more than one run down the same branch)
             if (pos == pattern.Length - 1 && pos > 1)
