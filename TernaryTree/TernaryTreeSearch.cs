@@ -142,15 +142,16 @@ namespace TernaryTree
             _transitions.RemoveAt(_state); 
             if (pos + 1 < pattern.Length)
             {
-                // If there's more pattern to match, then the repeating match shouldn't transition forward.
+                // If there's more pattern to match, then the repeating match shouldn't also transition forward.
                 // (It should only loop - which is added below.)
-                // TODO: Instead of doing this finicky delete, is some way to just decorate the other transitions so that they return a different result?
+                // TODO: Instead of doing this finicky delete, is there some way to just decorate the other transitions so that they return a different result?
                 // See the prefix match decorator used above.
                 _transitions[_transitions.Count - 1].RemoveAt(_transitions[_transitions.Count - 1].Count - 1);
             }
             // TODO: Can we add the loop state with a decorator instead?
             // Could have loop plus advance and loop without advance decorators.
-            // the previous transition should loop back to it's own state
+
+            // The previous transition should loop back to it's own state
             _state--;
             _switchNextSymbol(0, _lastSymbol, _state);
             if (pos + 1 < pattern.Length)
