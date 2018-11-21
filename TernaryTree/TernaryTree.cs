@@ -7,8 +7,9 @@ namespace TernaryTree
 {
     // TODO: Logging?
     // TODO: Error Handling and Documentation.  Follow Microsoft lead with interfaces.
-    // TODO: Unit tests.
-    // TODO: What if you try to add a string with whitespace or line-end characters?
+    // TODO: More unit tests.  Check line coverage.
+    // TODO: What if you try to add a string with whitespace or line-ending characters?
+    // TODO: If we stored a KeyValuePair at Node.Data, we could do away with all the string building.
 
     /// <summary>
     /// Provides a structure for storing key value pairs.
@@ -119,13 +120,6 @@ namespace TernaryTree
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="pattern"></param>
-        /// <returns></returns>
-        public ICollection<string> this[TernaryTreeSearch<V> pattern] => pattern.Match(_head);
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
         /// <remarks>
@@ -175,14 +169,26 @@ namespace TernaryTree
         /// 
         /// </summary>
         /// <param name="pattern">A regular expression to match.</param>
-        /// <returns></returns>
-        public ICollection<string> Match(string pattern) => this[new TernaryTreeSearch<V>(pattern)];
+        /// <returns>A collection of keys matching the regular expression.</returns>
+        public ICollection<string> Match(string pattern)
+        {
+            TernaryTreeSearch<V> search = new TernaryTreeSearch<V>(pattern);
+            return search.Match(_head);
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="prefix">The prefix to search.</param>
-        /// <returns></returns>
+        /// <param name="pattern">A <see cref="TernaryTreeSearch{V}"/> 
+        /// which has been configured to match a regular expression.</param>
+        /// <returns>A collection of keys matchig the regular expression.</returns>
+        public ICollection<string> Match(TernaryTreeSearch<V> pattern) => pattern.Match(_head);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="prefix">The prefix to match.</param>
+        /// <returns>A collection of keys matching the prefix.</returns>
         public ICollection<string> MatchPrefix(string prefix)
         {
             List<string> keys = new List<string>();

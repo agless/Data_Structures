@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace TernaryTree
 {
     public class TernaryTreeSearch<V>
     {
-        private delegate int Transition(char c);
+        // TODO: Detect / Throw syntax errors.
+
+        private delegate int Transition(Node<V> node, string key);
         private List<List<Transition>> _transitions;
         private int _state;
+        private string _lastSymbol;
+        private List<string> _matches;
 
         /// <summary>
         /// 
@@ -22,6 +25,7 @@ namespace TernaryTree
             }
             _transitions = new List<List<Transition>>();
             _buildState(0, pattern);
+            _matches = new List<string>();
             _state = 0;
         }
 
@@ -32,17 +36,17 @@ namespace TernaryTree
         /// <returns></returns>
         public ICollection<string> Match(Node<V> head)
         {
-            ICollection<string> matches = new LinkedList<string>();
-            _getBranchMatches(head, default(string), matches);
-            return matches;
+            _getBranchMatches(head, default(string));
+            return _matches;
         }
 
         #region Private Methods
 
-        private TernaryTreeSearch(ref List<List<Transition>> transitions, int state)
+        private TernaryTreeSearch(ref List<List<Transition>> transitions, ref List<string> matches, int state)
         {
             _transitions = transitions;
             _state = state;
+            _matches = matches;
         }
 
         private void _buildState(int pos, string pattern)
@@ -50,86 +54,119 @@ namespace TernaryTree
             while (pos < pattern.Length)
             {
                 char c = pattern[pos];
-                if (_transitions.Count == _state)
+                while (_transitions.Count <= _state)
                 {
                     _transitions.Add(new List<Transition>());
                 }
-                switch (c)
+                pos = _switchNextSymbol(pos, pattern, _transitions.Count);
+                _state++;
+            }
+        }
+
+        private int _switchNextSymbol(int pos, string pattern, int successState)
+        {
+            char c = pattern[pos];
+            switch (c)
+            {
+                case '.':
+                    pos = _handleDot(pos, pattern, successState);
+                    break;
+                //TODO: Write private methods for each of these special characters.
+                //TODO: Case insensitive mode?
+                //case '\\':
+                //    pos = _handleEscape(pos, pattern);
+                //    continue;
+                //case '^':
+                //case '$':
+                //case '|':
+                //case '?':
+                case '*':
+                    pos = _handleStar(pos, pattern);
+                    break;
+                //case '+':
+                //case '(':
+                //case '[':
+                //case '{':
+                //TODO: Handle grouping.
+                //pos = _handleGroup(pos, pattern);
+                //continue;
+                //case ']':
+                //case ')':
+                //case '}':
+                default:
+                    pos = _handleLiteral(pos, pattern, successState);
+                    break;
+            }
+            return pos;
+        }
+
+        private int _handleLiteral(int pos, string pattern, int successState)
+        {
+            char c = pattern[pos];
+            _lastSymbol = c.ToString();
+            _transitions[_state].Add(new Transition(_matchExact(c, successState)));
+            return ++pos;
+        }
+
+        private int _handleDot(int pos, string pattern, int successState)
+        {
+            _lastSymbol = ".";
+            _transitions[_state].Add(new Transition(_matchEverything(successState)));
+            return ++pos;
+        }
+
+        // TODO: Fix star repeating
+        private int _handleStar(int pos, string pattern)
+        {
+            // If the last symbol is repeating, add an appropriate decorator to all transitions out of the preceding state.
+            // TODO: Is there a risk of double-adding keys here?  (i.e. more than one run down the same branch)
+            if (pos == pattern.Length - 1 && pos > 1)
+            {
+                for (int i = 0; i < _transitions[_state - 2].Count; i++)
                 {
-                    case '.':
-                        pos = _handleDot(pos, pattern);
-                        continue;
-                    //TODO: Write private methods for each of these special characters.
-                    //TODO: Case insensitive mode?
-                    //case '\\':
-                    //    pos = _handleEscape(pos, pattern);
-                    //    continue;
-                    //case '^':
-                    //case '$':
-                    //case '|':
-                    //case '?':
-                    //case '*':
-                    //case '+':
-                    //case '(':
-                    //case '[':
-                    //case '{':
-                        //TODO: Handle grouping.
-                        //pos = _handleGroup(pos, pattern);
-                        //continue;
-                    //case ']':
-                    //case ')':
-                    //case '}':
-                    default:
-                        pos = _handleLiteral(pos, pattern);
-                        break;
+                    if (pattern[pos - 1] == '.')
+                    {
+                        // use the more efficient prefix match function to traverse the branch
+                        _transitions[_state - 2][i] = new Transition(
+                            _prefixMatchDecorator(_transitions[_state - 2][i]));
+                    }
+                    else
+                    {
+                        // match _zero_ or more instances of the repeating symbol
+                        _transitions[_state - 2][i] = new Transition(
+                            _checkValidKeyDecorator(_transitions[_state - 2][i]));
+                    }
                 }
             }
+            // The current last spot for transitions (which is also currently empty) shouldn't count for purposes of final state 
+            _transitions.RemoveAt(_state); 
+            if (pos + 1 < pattern.Length)
+            {
+                // If there's more pattern to match, then the repeating match shouldn't also transition forward.
+                // (It should only loop - which is added below.)
+                // TODO: Instead of doing this finicky delete, is there some way to just decorate the other transitions so that they return a different result?
+                // See the prefix match decorator used above.
+                _transitions[_transitions.Count - 1].RemoveAt(_transitions[_transitions.Count - 1].Count - 1);
+            }
+            // TODO: Can we add the loop state with a decorator instead?
+            // Could have loop plus advance and loop without advance decorators.
+
+            // The previous transition should loop back to it's own state
+            _state--;
+            _switchNextSymbol(0, _lastSymbol, _state);
+            if (pos + 1 < pattern.Length)
+            {
+                // If there's more to match, then add a transition for the next symbol here
+                // (match zero or more of the repeating symbol)
+                pos = _switchNextSymbol(pos + 1, pattern, _transitions.Count);
+                return pos;
+            }
+            return ++pos;
         }
 
-        private bool _checkRepeating(int pos, string pattern)
-        {
-            // TODO: Does repeating mean _zero_ or more instances?
-            // If so, I'm doing it wrong.
-            if (pos < pattern.Length - 1 && pattern[pos + 1] == '*')
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private int _handleLiteral(int pos, string pattern)
-        {
-            int finalPos = pos;
-            if (_checkRepeating(pos, pattern))
-            {
-                Transition repeat = new Transition(_matchExact(pattern[pos], _state));
-                _transitions[_state].Add(repeat);
-                finalPos++;
-            }
-            char c = pattern[pos];
-            Transition t = new Transition(_matchExact(c, _transitions.Count));
-            _transitions[_state++].Add(t);
-            return ++finalPos;
-        }
-
-        private int _handleDot(int pos, string pattern)
-        {
-            int finalPos = pos;
-            if (_checkRepeating(pos, pattern)) 
-            {
-                Transition repeat = new Transition(_matchEverything(_state));
-                _transitions[_state].Add(repeat);
-                finalPos++;
-            }
-            Transition t = new Transition(_matchEverything(_transitions.Count));
-            _transitions[_state++].Add(t);
-            return ++finalPos;
-        }
-
-        private void _getBranchMatches(Node<V> node, string key, ICollection<string> matches)
+        // TODO: Should _state actually just be a parameter of this method instead of a field?
+        // Would also have to be a parameter of the state builder method.  Could make things easier, though.
+        private void _getBranchMatches(Node<V> node, string key)
         {
             if (_state >= _transitions.Count)
             {
@@ -137,82 +174,52 @@ namespace TernaryTree
             }
             if (node.Smaller != null)
             {
-                TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(ref _transitions, _state);
-                tts._getBranchMatches(node.Smaller, key, matches);
+                // TODO: Why construct a new object here?  Why not just go down the branch recursively and restore oldState after?
+                TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(ref _transitions, ref _matches, _state);
+                tts._getBranchMatches(node.Smaller, key);
             }
             int oldState = _state;
             string newKey = key + node.Value;
             foreach (Transition transition in _transitions[_state])
             {
-                int nextState = transition.Invoke(node.Value);
+                int nextState = transition.Invoke(node, key);
                 if (nextState > -1)
                 {
-                    if (nextState == _transitions.Count - 1 &&
-                        nextState == oldState && 
-                        node.Equal != null)
-                    {
-                        _getPrefixMatches(node.Equal, newKey, matches);
-                        nextState++;
-                    }
                     if (nextState == _transitions.Count && node.IsFinalNode)
                     {
-                        matches.Add(newKey);
+                        _matches.Add(newKey);
                     }
                     if (nextState < _transitions.Count && node.Equal != null)
                     {
                         _state = nextState;
-                        _getBranchMatches(node.Equal, newKey, matches);
+                        _getBranchMatches(node.Equal, newKey);
                         _state = oldState;
                     }
                 }
             }
             if (node.Bigger != null)
             {
-                _getBranchMatches(node.Bigger, key, matches);
+                _getBranchMatches(node.Bigger, key);
             }
         }
 
-        private void _getPrefixMatches(Node<V> node, string prefix, ICollection<string> matches)
+        private void _getPrefixMatches(Node<V> node, string prefix)
         {
             if (node.Smaller != null)
             {
-                _getPrefixMatches(node, prefix, matches);
+                _getPrefixMatches(node.Smaller, prefix);
             }
             if (node.IsFinalNode)
             {
-                matches.Add(prefix + node.Value);
+                _matches.Add(prefix + node.Value);
             }
             if (node.Equal != null)
             {
-                _getPrefixMatches(node.Equal, prefix + node.Value, matches);
+                _getPrefixMatches(node.Equal, prefix + node.Value);
             }
             if (node.Bigger != null)
             {
-                _getPrefixMatches(node.Bigger, prefix, matches);
-            }
-        }
-
-        private char _getMinChar(char a, char b)
-        {
-            if (a <= b)
-            {
-                return a;
-            }
-            else
-            {
-                return b;
-            }
-        }
-
-        private char _getMaxChar(char a, char b)
-        {
-            if (a <= b)
-            {
-                return b;
-            }
-            else
-            {
-                return a;
+                _getPrefixMatches(node.Bigger, prefix);
             }
         }
 
@@ -220,13 +227,41 @@ namespace TernaryTree
 
         #region Delegate Factories
 
-        private Func<char, int> _matchEverything(int successState) => (c) => successState;
-
-        private Func<char, int> _matchNothing() => (c) => -1;
-
-        private Func<char, int> _matchExact(char a, int successState) => (c) =>
+        private Func<Node<V>, string, int> _prefixMatchDecorator(Transition t) => (node, key) =>
         {
-            if (c == a)
+            int newState = t.Invoke(node, key);
+            if (newState > -1 && newState == _transitions.Count - 1)
+            {
+                if (node.IsFinalNode)
+                {
+                    _matches.Add(key + node.Value);
+                }
+                if (node.Equal != null)
+                {
+                    _getPrefixMatches(node.Equal, key + node.Value);
+                }
+                // We just did the whole branch in one go.  No need to explore further.
+                return -1;
+            }
+            return newState;
+        };
+
+        private Func<Node<V>, string, int> _checkValidKeyDecorator(Transition t) => (node, key) => 
+        {
+            if (node.IsFinalNode)
+            {
+                _matches.Add(key + node.Value);
+            }
+            return t.Invoke(node, key);
+        };
+
+        private Func<Node<V>, string, int> _matchEverything(int successState) => (node, key) => successState;
+
+        private Func<Node<V>, string, int> _matchNothing() => (node, key) => -1;
+
+        private Func<Node<V>, string, int> _matchExact(char a, int successState) => (node, key) =>
+        {
+            if (node.Value == a)
             {
                 return successState;
             }
@@ -236,9 +271,9 @@ namespace TernaryTree
             }
         };
 
-        private Func<char, int> _matchRange(char a, char b, int successState) => (c) =>
+        private Func<Node<V>, string, int> _matchRange(char a, char b, int successState) => (node, key) =>
         {
-            if (c >= _getMinChar(a, b) && c <= _getMaxChar(a, b))
+            if (node.Value >= _getMinChar(a, b) && node.Value <= _getMaxChar(a, b))
             {
                 return successState;
             }
@@ -248,17 +283,21 @@ namespace TernaryTree
             }
         };
 
-        private Func<char, int> _matchAnyOf(ICollection<char> matches, int successState) => (c) =>
+        private Func<Node<V>, string, int> _matchAnyOf(ICollection<char> matchingChars, int successState) => (node, key) =>
         {
-            foreach (char match in matches)
+            foreach (char match in matchingChars)
             {
-                if (c == match)
+                if (node.Value == match)
                 {
                     return successState;
                 }
             }
             return -1;
         };
+
+        private char _getMinChar(char a, char b) => a <= b ? a : b;
+
+        private char _getMaxChar(char a, char b) => a <= b ? b : a;
 
         #endregion
     }
