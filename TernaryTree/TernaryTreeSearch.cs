@@ -132,7 +132,7 @@ namespace TernaryTree
                     }
                     else
                     {
-                        // match _zero_ or more instances of the repeating character
+                        // match _zero_ or more instances of the repeating symbol
                         _transitions[_state - 2][i] = new Transition(
                             _checkValidKeyDecorator(_transitions[_state - 2][i]));
                     }
@@ -229,7 +229,7 @@ namespace TernaryTree
         private Func<Node<V>, string, int> _prefixMatchDecorator(Transition t) => (node, key) =>
         {
             int newState = t.Invoke(node, key);
-            if (newState > -1)
+            if (newState > -1 && newState == _transitions.Count - 1)
             {
                 if (node.IsFinalNode)
                 {
