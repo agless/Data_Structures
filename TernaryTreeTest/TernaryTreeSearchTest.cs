@@ -5,6 +5,7 @@ using TernaryTree;
 
 namespace TernaryTreeTest
 {
+    // TODO: add 'nonMatchingKeys' parameter to all tests and assert that actual results do not contain
     class TernaryTreeSearchTest
     {
         private readonly ICollection<KeyValuePair<string, int>> _keyValueCollection = new List<KeyValuePair<string, int>>
@@ -120,6 +121,33 @@ namespace TernaryTreeTest
                 Assert.That(resultArray.Length, Is.EqualTo(1));
                 Assert.That(resultArray[0], Is.EqualTo(matchingKey));
             });
+        }
+
+        [TestCase("[a-z]", "a")]
+        [TestCase("[0-9]", "1")]
+        public void Range(string pattern, string matchingKey)
+        {
+
+        }
+
+        [TestCase("[^0-9]", "a")]
+        [TestCase("[^a-z]", "0")]
+        public void Any_But_Range(string pattern, string matchingKey)
+        {
+
+        }
+
+        [TestCase("[Aa]", new string[] { "A", "a"})]
+        [TestCase("[ABCDE][12345]", new string[] { "A1", "B2", "C3", "D4", "E5"})]
+        public void Character_Group(string pattern, string matchingKey1, ICollection<string> matchingKeys)
+        {
+
+        }
+
+        [TestCase("[^Aa]", new string[] { "B", "b"})]
+        public void Any_But_Group(string pattern, string matchingKey)
+        {
+
         }
     }
 }
