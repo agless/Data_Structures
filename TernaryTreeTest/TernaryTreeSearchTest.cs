@@ -127,7 +127,25 @@ namespace TernaryTreeTest
         [TestCase("[0-9]", new string[] { "0", "1", "2", "3", "4" }, new string[] { "A", "B", "C", "D", "E" })]
         public void Range(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-
+            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
+            foreach (string nonMatchingKey in nonMatchingKeys)
+            {
+                subject.Add(nonMatchingKey);
+            }
+            ICollection<string> actualResult = subject.Match(pattern);
+            HashSet<string> results = new HashSet<string>(actualResult);
+            Assert.Multiple(() => 
+            {
+                Assert.That(results.Count, Is.EqualTo(matchingKeys.Length));
+                foreach(string key in matchingKeys)
+                {
+                    Assert.That(results.Contains(key));
+                }
+                foreach(string nonMatchingKey in nonMatchingKeys)
+                {
+                    Assert.IsFalse(results.Contains(nonMatchingKey));
+                }
+            });
         }
 
         [TestCase("[^0-9]", new string[] { "a", "b", "c", "d", "e" }, new string[] { "0", "1", "2", "3", "4" })]
