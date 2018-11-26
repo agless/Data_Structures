@@ -123,29 +123,29 @@ namespace TernaryTreeTest
             });
         }
 
-        [TestCase("[a-z]", "a")]
-        [TestCase("[0-9]", "1")]
-        public void Range(string pattern, string matchingKey)
+        [TestCase("[a-z]", new string[] { "a", "b", "c", "d", "e" }, new string[] { "A", "B", "C", "D", "E" })]
+        [TestCase("[0-9]", new string[] { "0", "1", "2", "3", "4" }, new string[] { "A", "B", "C", "D", "E" })]
+        public void Range(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
 
         }
 
-        [TestCase("[^0-9]", "a")]
-        [TestCase("[^a-z]", "0")]
-        public void Any_But_Range(string pattern, string matchingKey)
+        [TestCase("[^0-9]", new string[] { "a", "b", "c", "d", "e" }, new string[] { "0", "1", "2", "3", "4" })]
+        [TestCase("[^a-z]", new string[] { "0", "1", "2", "3", "4" }, new string[] { "a", "b", "c", "d", "e" })]
+        public void Any_But_Range(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
 
         }
 
-        [TestCase("[Aa]", new string[] { "A", "a"})]
-        [TestCase("[ABCDE][12345]", new string[] { "A1", "B2", "C3", "D4", "E5"})]
-        public void Character_Group(string pattern, string matchingKey1, ICollection<string> matchingKeys)
+        [TestCase("[AaBbCc]", new string[] { "A", "a", "B", "b", "C", "c" }, new string[] { "D", "d", "E", "e", "F", "f" })]
+        [TestCase("[ABCDE][12345]", new string[] { "A1", "B2", "C3", "D4", "E5" }, new string[] { "F6", "G7", "H8", "I9", "J0" })]
+        public void Character_Group(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
 
         }
 
-        [TestCase("[^Aa]", new string[] { "B", "b"})]
-        public void Any_But_Group(string pattern, string matchingKey)
+        [TestCase("[^Aa]", new string[] { "B", "b" }, new string[] { "A", "a" })]
+        public void Any_But_Group(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
 
         }
