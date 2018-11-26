@@ -136,6 +136,7 @@ namespace TernaryTreeTest
             HashSet<string> results = new HashSet<string>(actualResult);
             Assert.Multiple(() => 
             {
+                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
                 Assert.That(results.Count, Is.EqualTo(matchingKeys.Length));
                 foreach(string key in matchingKeys)
                 {
