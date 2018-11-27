@@ -179,6 +179,7 @@ namespace TernaryTree
             if (pattern[++pos] == '^')
             {
                 isNegativeQuery = true;
+                pos++;
             }
             while (pos < pattern.Length && pattern[pos] != ']')
             {
