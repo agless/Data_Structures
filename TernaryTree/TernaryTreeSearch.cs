@@ -85,7 +85,9 @@ namespace TernaryTree
                     break;
                 //case '+':
                 //case '(':
-                //case '[':
+                case '[':
+                    pos = _handleBrackets(pos, pattern, successState);
+                    break;
                 //case '{':
                 //TODO: Handle grouping.
                 //pos = _handleGroup(pos, pattern);
@@ -168,6 +170,59 @@ namespace TernaryTree
             return ++pos;
         }
 
+        private int _handleBrackets(int pos, string pattern, int successState)
+        {
+            // TODO: If pos is last character throw error
+            bool isNegativeQuery = false;
+            bool isRangeQuery = false;
+            LinkedList<char> matchingChars = new LinkedList<char>();
+            if (pattern[++pos] == '^')
+            {
+                isNegativeQuery = true;
+                pos++;
+            }
+            while (pos < pattern.Length && pattern[pos] != ']')
+            {
+                if (pattern[pos] == '-')
+                {
+                    isRangeQuery = true;
+                    pos++;
+                    continue;
+                }
+                else
+                {
+                    matchingChars.AddLast(pattern[pos++]);
+                }
+            }
+            // TODO: if not ']' && is last pos throw error
+            if (isNegativeQuery && isRangeQuery)
+            {
+                // TODO: if matchingChars.Count > 2 throw error
+                char a, b;
+                a = matchingChars.First.Value;
+                b = matchingChars.Last.Value;
+                _transitions[_state].Add(new Transition(_matchAnythingButRange(a, b, successState)));
+            }
+            else if (isNegativeQuery)
+            {
+                _transitions[_state].Add(new Transition(_matchAnythingBut(matchingChars, successState)));
+            }
+            else if (isRangeQuery)
+            {
+                // TODO: if matchingChars.Count > 2 throw error
+                char a, b;
+                a = matchingChars.First.Value;
+                b = matchingChars.Last.Value;
+                _transitions[_state].Add(new Transition(_matchRange(a, b, successState)));
+            }
+            else
+            {
+                _transitions[_state].Add(new Transition(_matchAnyOf(matchingChars, successState)));
+            }
+            // TODO: how are we going to handle _lastSymbol?
+            return ++pos;
+        }
+        
         // TODO: Should _state actually just be a parameter of this method instead of a field?
         // Would also have to be a parameter of the state builder method.  Could make things easier, though.
         private void _getBranchMatches(Node<V> node, string key)
@@ -297,6 +352,30 @@ namespace TernaryTree
                 }
             }
             return -1;
+        };
+
+        private Func<Node<V>, string, int> _matchAnythingBut(ICollection<char> nonMatchingChars, int successState) => (node, key) =>
+        {
+            foreach (char nonMatch in nonMatchingChars)
+            {
+                if (node.Value == nonMatch)
+                {
+                    return -1;
+                }
+            }
+            return successState;
+        };
+
+        private Func<Node<V>, string, int> _matchAnythingButRange(char a, char b, int successState) => (node, key) =>
+        {
+            if (node.Value >= _getMinChar(a, b) && node.Value <= _getMaxChar(a, b))
+            {
+                return -1;
+            }
+            else
+            {
+                return successState;
+            }
         };
 
         private char _getMinChar(char a, char b) => a <= b ? a : b;
