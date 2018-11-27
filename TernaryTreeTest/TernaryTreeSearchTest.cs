@@ -73,10 +73,6 @@ namespace TernaryTreeTest
                 {
                     Assert.That(actualResult.Contains(key));
                 }
-                foreach (string nonMatchingKey in nonMatchingKeys)
-                {
-                    Assert.IsFalse(actualResult.Contains(nonMatchingKey));
-                }
             });
         }
 
@@ -150,10 +146,6 @@ namespace TernaryTreeTest
                 {
                     Assert.That(actualResult.Contains(key));
                 }
-                foreach (string nonMatchingKey in nonMatchingKeys)
-                {
-                    Assert.IsFalse(actualResult.Contains(nonMatchingKey));
-                }
             });
         }
 
@@ -174,10 +166,6 @@ namespace TernaryTreeTest
                 foreach (string key in matchingKeys)
                 {
                     Assert.That(actualResult.Contains(key));
-                }
-                foreach (string nonMatchingKey in nonMatchingKeys)
-                {
-                    Assert.IsFalse(actualResult.Contains(nonMatchingKey));
                 }
             });
         }
@@ -200,10 +188,6 @@ namespace TernaryTreeTest
                 {
                     Assert.That(actualResult.Contains(key));
                 }
-                foreach (string nonMatchingKey in nonMatchingKeys)
-                {
-                    Assert.IsFalse(actualResult.Contains(nonMatchingKey));
-                }
             });
         }
 
@@ -223,10 +207,6 @@ namespace TernaryTreeTest
                 foreach (string key in matchingKeys)
                 {
                     Assert.That(actualResult.Contains(key));
-                }
-                foreach (string nonMatchingKey in nonMatchingKeys)
-                {
-                    Assert.IsFalse(actualResult.Contains(nonMatchingKey));
                 }
             });
         }
