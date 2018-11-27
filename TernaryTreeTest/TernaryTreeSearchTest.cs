@@ -53,22 +53,31 @@ namespace TernaryTreeTest
             });
         }
 
-        [TestCase("ab*a", "abbbbbba")]
-        [TestCase("a*b", "aaaaaaaab")]
-        [TestCase("ab*", "abbbbbbbb")]
-        [TestCase("ab*c", "ac")]
-        [TestCase("ab*", "a")]
-        public void Repeating_Literal(string pattern, string expectedResult)
+        [TestCase("ab*a", new string[] { "abbbbbba", "aba", "aa" }, new string[] { "abca", "ab", "ba" })]
+        [TestCase("a*b", new string[] { "aaaaaaaab", "ab", "b" }, new string[] { "acb", "cab", "ba"})]
+        [TestCase("ab*", new string[] { "abbbbbbbb", "ab", "a" }, new string[] { "acb", "ba", "abc" })]
+        [TestCase("ab*c", new string[] { "abbbbbbbbc", "abc", "ac" }, new string[] { "acb", "cab", "bca" })]
+        [TestCase("ab*", new string[] { "a", "ab", "abbbb" }, new string[] { "b", "ba", "bbbbba" })]
+        public void Repeating_Literal(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            TernaryTree<int> subject = TernaryTree<int>.Create(_keyValueCollection);
-            subject.Add(expectedResult);
-            ICollection<string> actualResult = subject.Match(pattern);
-            string[] resultArray = new string[actualResult.Count];
-            actualResult.CopyTo(resultArray, 0);
+            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
+            foreach (string nonMatchingKey in nonMatchingKeys)
+            {
+                subject.Add(nonMatchingKey);
+            }
+            HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
             Assert.Multiple(() =>
             {
-                Assert.That(resultArray.Length, Is.EqualTo(1));
-                Assert.That(resultArray[0], Is.EqualTo(expectedResult));
+                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
+                Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
+                foreach (string key in matchingKeys)
+                {
+                    Assert.That(actualResult.Contains(key));
+                }
+                foreach (string nonMatchingKey in nonMatchingKeys)
+                {
+                    Assert.IsFalse(actualResult.Contains(nonMatchingKey));
+                }
             });
         }
 
