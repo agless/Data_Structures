@@ -55,9 +55,8 @@ namespace TernaryTreeTest
 
         [TestCase("ab*a", new string[] { "abbbbbba", "aba", "aa" }, new string[] { "abca", "ab", "ba" })]
         [TestCase("a*b", new string[] { "aaaaaaaab", "ab", "b" }, new string[] { "acb", "cab", "ba"})]
-        [TestCase("ab*", new string[] { "abbbbbbbb", "ab", "a" }, new string[] { "acb", "ba", "abc" })]
+        [TestCase("ab*", new string[] { "abbbbbbbb", "ab", "a" }, new string[] { "b", "acb", "ba", "abc" })]
         [TestCase("ab*c", new string[] { "abbbbbbbbc", "abc", "ac" }, new string[] { "acb", "cab", "bca" })]
-        [TestCase("ab*", new string[] { "a", "ab", "abbbb" }, new string[] { "b", "ba", "bbbbba" })]
         public void Repeating_Literal(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
