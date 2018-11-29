@@ -36,6 +36,7 @@ namespace TernaryTree
         /// <returns></returns>
         public ICollection<string> Match(Node<V> head)
         {
+            _ = head ?? throw new ArgumentNullException(nameof(head));
             _getBranchMatches(head, default(string));
             return _matches;
         }
@@ -89,12 +90,6 @@ namespace TernaryTree
                     pos = _handleBrackets(pos, pattern, successState);
                     break;
                 //case '{':
-                //TODO: Handle grouping.
-                //pos = _handleGroup(pos, pattern);
-                //continue;
-                //case ']':
-                //case ')':
-                //case '}':
                 default:
                     pos = _handleLiteral(pos, pattern, successState);
                     break;

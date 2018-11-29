@@ -122,7 +122,7 @@ namespace TernaryTreeTest
         }
 
         [TestCase(".*a.*", new string[] { "a", "ba", "ac", "bbbbbbbbbbbbbbbacccccccccccccc" }, new string[] { "none", "of", "these" })]
-        [TestCase(".*test.*", new string[] { "test_this", "this is the test", "this test" }, new string[] { "tes", "est", "best" })]
+        [TestCase(".*test.*", new string[] { "test_this", "this is the test", "this test right here" }, new string[] { "tes", "est", "best" })]
         [TestCase(".*first.*second.*third.*", new string[] { "xxx_first_xxx_second_xxx_third_xxx", "firstsecondthird", "first; second; third" }, new string[] { "third", "this ain't it", "first" })]
         public void Contains_Exact(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
@@ -144,7 +144,7 @@ namespace TernaryTreeTest
         }
 
         [TestCase("[a-z]", new string[] { "a", "b", "c", "d", "e" }, new string[] { "A", "B", "C", "D", "E" })]
-        [TestCase("[0-9]", new string[] { "0", "1", "2", "3", "4" }, new string[] { "A", "B", "C", "D", "E" })]
+        [TestCase("[A-Z][0-9]", new string[] { "A0", "B1", "C2", "D3", "E4" }, new string[] { "9A", "BB", "AC", "6D", "a1" })]
         public void Range(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
@@ -187,6 +187,7 @@ namespace TernaryTreeTest
 
         [TestCase("[AaBbCc]", new string[] { "A", "a", "B", "b", "C", "c" }, new string[] { "D", "d", "E", "e", "F", "f" })]
         [TestCase("[ABCDE][12345]", new string[] { "A1", "B2", "C3", "D4", "E5" }, new string[] { "F6", "G7", "H8", "I9", "J0" })]
+        [TestCase("[Ll1][Ee3][Ee3][Tt7]", new string[] { "1337", "leet", "LEET", "13eT" }, new string[] { "Elite", "lite", "leat", "light" })]
         public void Character_Group(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
