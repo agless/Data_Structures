@@ -196,7 +196,7 @@ namespace TernaryTree
                 }
             }
 
-            if ((pos == pattern.Length - 1 && pattern[pos] != ']') ||
+            if ((pos == pattern.Length && pattern[pos - 1] != ']') ||
                 (isRangeQuery && matchingChars.Count > 2))
             {
                 _throwSyntaxError(pos, pattern);
@@ -294,7 +294,7 @@ namespace TernaryTree
             message.Append(Environment.NewLine);
             message.Append(pattern);
             message.Append(Environment.NewLine);
-            message.Append(' ', pos - 1);
+            message.Append(' ', pos);
             message.Append('^');
             throw new ArgumentException(message.ToString());
         }
