@@ -36,6 +36,7 @@ namespace TernaryTree
         /// <returns></returns>
         public ICollection<string> Match(Node<V> head)
         {
+            _ = head ?? throw new ArgumentNullException(nameof(head));
             _getBranchMatches(head, default(string));
             return _matches;
         }
@@ -89,12 +90,6 @@ namespace TernaryTree
                     pos = _handleBrackets(pos, pattern, successState);
                     break;
                 //case '{':
-                //TODO: Handle grouping.
-                //pos = _handleGroup(pos, pattern);
-                //continue;
-                //case ']':
-                //case ')':
-                //case '}':
                 default:
                     pos = _handleLiteral(pos, pattern, successState);
                     break;
@@ -117,7 +112,6 @@ namespace TernaryTree
             return ++pos;
         }
 
-        // TODO: Fix star repeating
         private int _handleStar(int pos, string pattern)
         {
             // TODO: Throw some kind of syntax error (ArgumentException?) if star is in the first position.  (There's nothing to repeat.)
@@ -173,6 +167,7 @@ namespace TernaryTree
         private int _handleBrackets(int pos, string pattern, int successState)
         {
             // TODO: If pos is last character throw error
+            int startPos = pos;
             bool isNegativeQuery = false;
             bool isRangeQuery = false;
             LinkedList<char> matchingChars = new LinkedList<char>();
@@ -219,7 +214,7 @@ namespace TernaryTree
             {
                 _transitions[_state].Add(new Transition(_matchAnyOf(matchingChars, successState)));
             }
-            // TODO: how are we going to handle _lastSymbol?
+            _lastSymbol = pattern.Substring(startPos, pos - startPos + 1);
             return ++pos;
         }
         
@@ -307,11 +302,12 @@ namespace TernaryTree
 
         private Func<Node<V>, string, int> _checkValidKeyDecorator(Transition t) => (node, key) => 
         {
-            if (node.IsFinalNode)
+            int newState = t.Invoke(node, key);
+            if (newState > -1 && node.IsFinalNode)
             {
                 _matches.Add(key + node.Value);
             }
-            return t.Invoke(node, key);
+            return newState;
         };
 
         private Func<Node<V>, string, int> _matchEverything(int successState) => (node, key) => successState;

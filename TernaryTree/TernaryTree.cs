@@ -8,8 +8,8 @@ namespace TernaryTree
     // TODO: Logging?
     // TODO: Error Handling and Documentation.  Follow Microsoft lead with interfaces.
     // TODO: More unit tests.  Check line coverage.
-    // TODO: What if you try to add a string with whitespace or line-ending characters?
-    // TODO: If we stored a KeyValuePair at Node.Data, we could do away with all the string building.
+    // TODO: What if you try to add a string with line-ending (or other special) characters?
+    // TODO: If we stored a KeyValuePair at Node.Data, we could do away with all the string building. Is this preferrable?
 
     /// <summary>
     /// Provides a structure for storing key value pairs.
