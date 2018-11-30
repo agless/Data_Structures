@@ -104,5 +104,15 @@ namespace TernaryTreeTest
         {
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
+
+        [TestCase("*........")]
+        [TestCase("....**....")]
+        [TestCase("abcd[")]
+        [TestCase("[abcdef")]
+        public void Throws_ArgumentException_For_Bad_Pattern(string pattern)
+        {
+            TernaryTree<int> subject = new TernaryTree<int>();
+            Assert.Throws<ArgumentException>(() => { subject.Match(pattern); });
+        }
     }
 }

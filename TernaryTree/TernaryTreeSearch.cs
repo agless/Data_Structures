@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace TernaryTree
 {
     public class TernaryTreeSearch<V>
     {
-        // TODO: Detect / Throw syntax errors.
-
         private delegate int Transition(Node<V> node, string key);
         private List<List<Transition>> _transitions;
         private int _state;
@@ -114,9 +113,10 @@ namespace TernaryTree
 
         private int _handleStar(int pos, string pattern)
         {
-            // TODO: Throw some kind of syntax error (ArgumentException?) if star is in the first position.  (There's nothing to repeat.)
-            // TODO: Throw some kind of syntax error (ArgumentException?) if star follows star.  (There's nothing to repeat)
-            // ^^Careful - don't throw if it's matching a literal '*'.  Check for escape character preceding that.
+            if ((pos == 0) || (pos > 1 && pattern[pos - 1] == '*' && pattern[pos - 2] != '\\'))
+            {
+                _throwSyntaxError(pos, pattern);
+            }
             
             // If the last symbol is repeating, add an appropriate decorator to all transitions out of the preceding state.
             // TODO: Is there a risk of double-adding keys here?  (i.e. more than one run down the same branch)
@@ -166,16 +166,22 @@ namespace TernaryTree
 
         private int _handleBrackets(int pos, string pattern, int successState)
         {
-            // TODO: If pos is last character throw error
+            if (pos == pattern.Length - 1)
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+
             int startPos = pos;
             bool isNegativeQuery = false;
             bool isRangeQuery = false;
             LinkedList<char> matchingChars = new LinkedList<char>();
+
             if (pattern[++pos] == '^')
             {
                 isNegativeQuery = true;
                 pos++;
             }
+
             while (pos < pattern.Length && pattern[pos] != ']')
             {
                 if (pattern[pos] == '-')
@@ -189,10 +195,15 @@ namespace TernaryTree
                     matchingChars.AddLast(pattern[pos++]);
                 }
             }
-            // TODO: if not ']' && is last pos throw error
+
+            if ((pos == pattern.Length && pattern[pos - 1] != ']') ||
+                (isRangeQuery && matchingChars.Count > 2))
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+
             if (isNegativeQuery && isRangeQuery)
             {
-                // TODO: if matchingChars.Count > 2 throw error
                 char a, b;
                 a = matchingChars.First.Value;
                 b = matchingChars.Last.Value;
@@ -204,7 +215,6 @@ namespace TernaryTree
             }
             else if (isRangeQuery)
             {
-                // TODO: if matchingChars.Count > 2 throw error
                 char a, b;
                 a = matchingChars.First.Value;
                 b = matchingChars.Last.Value;
@@ -214,6 +224,7 @@ namespace TernaryTree
             {
                 _transitions[_state].Add(new Transition(_matchAnyOf(matchingChars, successState)));
             }
+
             _lastSymbol = pattern.Substring(startPos, pos - startPos + 1);
             return ++pos;
         }
@@ -275,6 +286,17 @@ namespace TernaryTree
             {
                 _getPrefixMatches(node.Bigger, prefix);
             }
+        }
+
+        private void _throwSyntaxError(int pos, string pattern)
+        {
+            StringBuilder message = new StringBuilder("Invalid pattern near:");
+            message.Append(Environment.NewLine);
+            message.Append(pattern);
+            message.Append(Environment.NewLine);
+            message.Append(' ', pos);
+            message.Append('^');
+            throw new ArgumentException(message.ToString());
         }
 
         #endregion
