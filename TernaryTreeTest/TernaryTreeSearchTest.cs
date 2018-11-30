@@ -5,7 +5,6 @@ using TernaryTree;
 
 namespace TernaryTreeTest
 {
-    // TODO: Every test has the same body.  Should there only be a single test method with 100+ test cases?
     class TernaryTreeSearchTest
     {
         public void Regex_Match_Test(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
