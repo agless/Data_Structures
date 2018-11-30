@@ -8,12 +8,7 @@ namespace TernaryTreeTest
     // TODO: Every test has the same body.  Should there only be a single test method with 100+ test cases?
     class TernaryTreeSearchTest
     {
-        [TestCase("zero", new string[] { "zero" }, new string[] { "one", "two", "three", "four" })]
-        [TestCase("one", new string[] { "one" }, new string[] { "zero", "two", "three", "four" })]
-        [TestCase("two", new string[] { "two" }, new string[] { "zero", "one", "three", "four" })]
-        [TestCase("three", new string[] { "three" }, new string[] { "zero", "one", "two", "four" })]
-        [TestCase("four", new string[] { "four" }, new string[] { "zero", "one", "two", "three" })]
-        public void Exact_Match(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
+        public void Regex_Match_Test(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
             TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
             foreach (string nonMatchingKey in nonMatchingKeys)
@@ -30,6 +25,16 @@ namespace TernaryTreeTest
                     Assert.That(actualResult.Contains(key));
                 }
             });
+        }
+
+        [TestCase("zero", new string[] { "zero" }, new string[] { "one", "two", "three", "four" })]
+        [TestCase("one", new string[] { "one" }, new string[] { "zero", "two", "three", "four" })]
+        [TestCase("two", new string[] { "two" }, new string[] { "zero", "one", "three", "four" })]
+        [TestCase("three", new string[] { "three" }, new string[] { "zero", "one", "two", "four" })]
+        [TestCase("four", new string[] { "four" }, new string[] { "zero", "one", "two", "three" })]
+        public void Exact_Match(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
+        {
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase(".ero", new string[] { "zero", "hero", "nero" }, new string[] { "none", "of", "these" })]
@@ -39,21 +44,7 @@ namespace TernaryTreeTest
         [TestCase("f...", new string[] { "four", "foot", "flip" }, new string[] { "flashy", "freaking", "fools" })]
         public void Wildcard_Match(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
-            foreach (string nonMatchingKey in nonMatchingKeys)
-            {
-                subject.Add(nonMatchingKey);
-            }
-            HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
-            Assert.Multiple(() =>
-            {
-                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
-                Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
-                foreach (string key in matchingKeys)
-                {
-                    Assert.That(actualResult.Contains(key));
-                }
-            });
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase("ab*a", new string[] { "abbbbbba", "aba", "aa" }, new string[] { "abca", "ab", "ba" })]
@@ -62,21 +53,7 @@ namespace TernaryTreeTest
         [TestCase("ab*c", new string[] { "abbbbbbbbc", "abc", "ac" }, new string[] { "acb", "cab", "bca" })]
         public void Repeating_Literal(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
-            foreach (string nonMatchingKey in nonMatchingKeys)
-            {
-                subject.Add(nonMatchingKey);
-            }
-            HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
-            Assert.Multiple(() =>
-            {
-                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
-                Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
-                foreach (string key in matchingKeys)
-                {
-                    Assert.That(actualResult.Contains(key));
-                }
-            });
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase("a.*a", new string[] { "aa", "aba", "abca", "abbbcbcbccccbba" }, new string[] { "a", "ab", "ba", "abc" })]
@@ -84,41 +61,13 @@ namespace TernaryTreeTest
         [TestCase("a.*", new string[] { "a", "ab", "abcbccbcbccbbbcbc" }, new string[] { "b", "ba", "baaaa" })]
         public void Repeating_Dot(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
-            foreach (string nonMatchingKey in nonMatchingKeys)
-            {
-                subject.Add(nonMatchingKey);
-            }
-            HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
-            Assert.Multiple(() =>
-            {
-                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
-                Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
-                foreach (string key in matchingKeys)
-                {
-                    Assert.That(actualResult.Contains(key));
-                }
-            });
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase("th.*", new string[] { "this", "these", "those" }, new string[] { "nothing", "in", "here" })]
         public void Prefix_Exact(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
-            foreach (string nonMatchingKey in nonMatchingKeys)
-            {
-                subject.Add(nonMatchingKey);
-            }
-            HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
-            Assert.Multiple(() =>
-            {
-                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
-                Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
-                foreach (string key in matchingKeys)
-                {
-                    Assert.That(actualResult.Contains(key));
-                }
-            });
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase(".*a.*", new string[] { "a", "ba", "ac", "bbbbbbbbbbbbbbbacccccccccccccc" }, new string[] { "none", "of", "these" })]
@@ -126,63 +75,21 @@ namespace TernaryTreeTest
         [TestCase(".*first.*second.*third.*", new string[] { "xxx_first_xxx_second_xxx_third_xxx", "firstsecondthird", "first; second; third" }, new string[] { "third", "this ain't it", "first" })]
         public void Contains_Exact(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
-            foreach (string nonMatchingKey in nonMatchingKeys)
-            {
-                subject.Add(nonMatchingKey);
-            }
-            HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
-            Assert.Multiple(() =>
-            {
-                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
-                Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
-                foreach (string key in matchingKeys)
-                {
-                    Assert.That(actualResult.Contains(key));
-                }
-            });
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase("[a-z]", new string[] { "a", "b", "c", "d", "e" }, new string[] { "A", "B", "C", "D", "E" })]
         [TestCase("[A-Z][0-9]", new string[] { "A0", "B1", "C2", "D3", "E4" }, new string[] { "9A", "BB", "AC", "6D", "a1" })]
         public void Range(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
-            foreach (string nonMatchingKey in nonMatchingKeys)
-            {
-                subject.Add(nonMatchingKey);
-            }
-            HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
-            Assert.Multiple(() => 
-            {
-                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
-                Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
-                foreach (string key in matchingKeys)
-                {
-                    Assert.That(actualResult.Contains(key));
-                }
-            });
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase("[^0-9]", new string[] { "a", "b", "c", "d", "e" }, new string[] { "0", "1", "2", "3", "4" })]
         [TestCase("[^a-z]", new string[] { "0", "1", "2", "3", "4" }, new string[] { "a", "b", "c", "d", "e" })]
         public void Any_But_Range(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
-            foreach (string nonMatchingKey in nonMatchingKeys)
-            {
-                subject.Add(nonMatchingKey);
-            }
-            HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
-            Assert.Multiple(() =>
-            {
-                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
-                Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
-                foreach (string key in matchingKeys)
-                {
-                    Assert.That(actualResult.Contains(key));
-                }
-            });
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase("[AaBbCc]", new string[] { "A", "a", "B", "b", "C", "c" }, new string[] { "D", "d", "E", "e", "F", "f" })]
@@ -190,41 +97,13 @@ namespace TernaryTreeTest
         [TestCase("[Ll1][Ee3][Ee3][Tt7]", new string[] { "1337", "leet", "LEET", "13eT" }, new string[] { "Elite", "lite", "leat", "light" })]
         public void Character_Group(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
-            foreach (string nonMatchingKey in nonMatchingKeys)
-            {
-                subject.Add(nonMatchingKey);
-            }
-            HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
-            Assert.Multiple(() =>
-            {
-                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
-                Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
-                foreach (string key in matchingKeys)
-                {
-                    Assert.That(actualResult.Contains(key));
-                }
-            });
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase("[^Aa]", new string[] { "B", "b" }, new string[] { "A", "a" })]
         public void Any_But_Group(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
-            foreach (string nonMatchingKey in nonMatchingKeys)
-            {
-                subject.Add(nonMatchingKey);
-            }
-            HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
-            Assert.Multiple(() =>
-            {
-                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
-                Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
-                foreach (string key in matchingKeys)
-                {
-                    Assert.That(actualResult.Contains(key));
-                }
-            });
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
     }
 }
