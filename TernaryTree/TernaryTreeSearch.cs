@@ -294,7 +294,10 @@ namespace TernaryTree
             message.Append(Environment.NewLine);
             message.Append(pattern);
             message.Append(Environment.NewLine);
-            message.Append(' ', pos);
+            if (pos > 0)
+            {
+                message.Append(' ', pos - 1);
+            }
             message.Append('^');
             throw new ArgumentException(message.ToString());
         }
