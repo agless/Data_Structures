@@ -73,9 +73,9 @@ namespace TernaryTree
                     break;
                 //TODO: Write private methods for each of these special characters.
                 //TODO: Case insensitive mode?
-                //case '\\':
-                //    pos = _handleEscape(pos, pattern);
-                //    continue;
+                case '\\':
+                    pos = _handleEscape(pos, pattern, successState);
+                    break; ;
                 //case '^':
                 //case '$':
                 //case '|':
@@ -226,6 +226,60 @@ namespace TernaryTree
             }
 
             _lastSymbol = pattern.Substring(startPos, pos - startPos + 1);
+            return ++pos;
+        }
+
+        private int _handleEscape(int pos, string pattern, int successState)
+        {
+            if (pos == pattern.Length - 1)
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+            switch (pattern[++pos])
+            {
+                case 'a':
+                    _lastSymbol = @"\a";
+                    _transitions[_state].Add(new Transition(_matchExact('\u0007', successState)));
+                    break;
+                case 'b':
+                    _lastSymbol = @"\b";
+                    _transitions[_state].Add(new Transition(_matchExact('\u0008', successState)));
+                    break;
+                case 't':
+                    _lastSymbol = @"\t";
+                    _transitions[_state].Add(new Transition(_matchExact('\u0009', successState)));
+                    break;
+                case 'r':
+                    _lastSymbol = @"\r";
+                    _transitions[_state].Add(new Transition(_matchExact('\u000D', successState)));
+                    break;
+                case 'v':
+                    _lastSymbol = @"\v";
+                    _transitions[_state].Add(new Transition(_matchExact('\u000B', successState)));
+                    break;
+                case 'f':
+                    _lastSymbol = @"\f";
+                    _transitions[_state].Add(new Transition(_matchExact('\u000C', successState)));
+                    break;
+                case 'n':
+                    _lastSymbol = @"\n";
+                    _transitions[_state].Add(new Transition(_matchExact('\u000A', successState)));
+                    break;
+                case 'e':
+                    _lastSymbol = @"\e";
+                    _transitions[_state].Add(new Transition(_matchExact('\u001B', successState)));
+                    break;
+                //case 'x':
+                //    break;
+                //case 'c':
+                //    break;
+                //case 'u':
+                //    break;
+                default:
+                    _lastSymbol = $"\\{pattern[pos]}";
+                    _transitions[_state].Add(new Transition(_matchExact(pattern[pos], successState)));
+                    break;
+            }
             return ++pos;
         }
         
