@@ -229,6 +229,8 @@ namespace TernaryTree
             return ++pos;
         }
 
+        // TODO: This doesn't seem right.  What if there's an escaped character inside brackets?  A simple _matchExact won't work.
+        // Maybe what we need this method to do is convert the escape into a (special) character that the calling method can deal with.
         private int _handleEscape(int pos, string pattern, int successState)
         {
             if (pos == pattern.Length - 1)
