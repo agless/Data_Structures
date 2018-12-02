@@ -238,36 +238,28 @@ namespace TernaryTree
             switch (pattern[++pos])
             {
                 case 'a':
-                    _lastSymbol = @"\a";
-                    _transitions[_state].Add(new Transition(_matchExact('\u0007', successState)));
+                    _handleSpecialChar(@"\a", '\u0007', successState);
                     break;
                 case 'b':
-                    _lastSymbol = @"\b";
-                    _transitions[_state].Add(new Transition(_matchExact('\u0008', successState)));
+                    _handleSpecialChar(@"\b", '\u0008', successState);
                     break;
                 case 't':
-                    _lastSymbol = @"\t";
-                    _transitions[_state].Add(new Transition(_matchExact('\u0009', successState)));
+                    _handleSpecialChar(@"\t", '\u0009', successState);
                     break;
                 case 'r':
-                    _lastSymbol = @"\r";
-                    _transitions[_state].Add(new Transition(_matchExact('\u000D', successState)));
+                    _handleSpecialChar(@"\r", '\u000D', successState);
                     break;
                 case 'v':
-                    _lastSymbol = @"\v";
-                    _transitions[_state].Add(new Transition(_matchExact('\u000B', successState)));
+                    _handleSpecialChar(@"\v", '\u000B', successState);
                     break;
                 case 'f':
-                    _lastSymbol = @"\f";
-                    _transitions[_state].Add(new Transition(_matchExact('\u000C', successState)));
+                    _handleSpecialChar(@"\f", '\u000C', successState);
                     break;
                 case 'n':
-                    _lastSymbol = @"\n";
-                    _transitions[_state].Add(new Transition(_matchExact('\u000A', successState)));
+                    _handleSpecialChar(@"\n", '\u000A', successState);
                     break;
                 case 'e':
-                    _lastSymbol = @"\e";
-                    _transitions[_state].Add(new Transition(_matchExact('\u001B', successState)));
+                    _handleSpecialChar(@"\e", '\u001B', successState);
                     break;
                 //case 'x':
                 //    break;
@@ -281,6 +273,12 @@ namespace TernaryTree
                     break;
             }
             return ++pos;
+        }
+
+        private void _handleSpecialChar(string lastSymbol, char special, int successState)
+        {
+            _lastSymbol = lastSymbol;
+            _transitions[_state].Add(new Transition(_matchExact(special, successState)));
         }
         
         // TODO: Should _state actually just be a parameter of this method instead of a field?
