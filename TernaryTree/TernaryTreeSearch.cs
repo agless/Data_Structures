@@ -68,14 +68,17 @@ namespace TernaryTree
             char c = pattern[pos];
             switch (c)
             {
+                //TODO: Write private methods for each of these special characters.
+                //TODO: Case insensitive mode?
                 case '.':
                     pos = _handleDot(pos, pattern, successState);
                     break;
-                //TODO: Write private methods for each of these special characters.
-                //TODO: Case insensitive mode?
                 case '\\':
-                    pos = _handleEscape(pos, pattern, successState);
-                    break; ;
+                    int startPos = pos;
+                    pos = _getEscapeChar(pos, pattern, out char d);
+                    _handleLiteral(0, d.ToString(), successState);
+                    _lastSymbol = pattern.Substring(startPos, pos - startPos + 1);
+                    break;
                 //case '^':
                 //case '$':
                 //case '|':
@@ -229,58 +232,71 @@ namespace TernaryTree
             return ++pos;
         }
 
-        // TODO: This doesn't seem right.  What if there's an escaped character inside brackets?  A simple _matchExact won't work.
-        // Maybe what we need this method to do is convert the escape into a (special) character that the calling method can deal with.
-        private int _handleEscape(int pos, string pattern, int successState)
+        private int _getEscapeChar(int pos, string pattern, out char c)
         {
+            c = default(char);
             if (pos == pattern.Length - 1)
             {
                 _throwSyntaxError(pos, pattern);
             }
-            switch (pattern[++pos])
+            if (pattern[++pos] >= '0' && pattern[pos] <= '7')
             {
-                case 'a':
-                    _handleSpecialChar(@"\a", '\u0007', successState);
-                    break;
-                case 'b':
-                    _handleSpecialChar(@"\b", '\u0008', successState);
-                    break;
-                case 't':
-                    _handleSpecialChar(@"\t", '\u0009', successState);
-                    break;
-                case 'r':
-                    _handleSpecialChar(@"\r", '\u000D', successState);
-                    break;
-                case 'v':
-                    _handleSpecialChar(@"\v", '\u000B', successState);
-                    break;
-                case 'f':
-                    _handleSpecialChar(@"\f", '\u000C', successState);
-                    break;
-                case 'n':
-                    _handleSpecialChar(@"\n", '\u000A', successState);
-                    break;
-                case 'e':
-                    _handleSpecialChar(@"\e", '\u001B', successState);
-                    break;
-                //case 'x':
-                //    break;
-                //case 'c':
-                //    break;
-                //case 'u':
-                //    break;
-                default:
-                    _lastSymbol = $"\\{pattern[pos]}";
-                    _transitions[_state].Add(new Transition(_matchExact(pattern[pos], successState)));
-                    break;
+                string octal;
+                if ((pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7') &&
+                    (pattern[pos + 2] >= '0' && pattern[pos + 2] <= '7'))
+                {
+                    octal = pattern.Substring(pos, 3);
+                }
+                else if (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7')
+                {
+                    octal = pattern.Substring(pos, 2);
+                }
+                else
+                {
+                    _throwSyntaxError(pos, pattern);
+                }
+                // convert the octal string to the char it represents
+            }
+            else
+            {
+                switch (pattern[pos])
+                {
+                    case 'a':
+                        c = '\u0007';
+                        break;
+                    case 'b':
+                        c = '\u0008';
+                        break;
+                    case 't':
+                        c = '\u0009';
+                        break;
+                    case 'r':
+                        c = '\u000D';
+                        break;
+                    case 'v':
+                        c = '\u000B';
+                        break;
+                    case 'f':
+                        c = '\u000C';
+                        break;
+                    case 'n':
+                        c = '\u000A';
+                        break;
+                    case 'e':
+                        c = '\u001B';
+                        break;
+                    //case 'x': 
+                    //    break;
+                    //case 'c':
+                    //    break;
+                    //case 'u':
+                    //    break;
+                    default:
+                        c = pattern[pos];
+                        break;
+                }
             }
             return ++pos;
-        }
-
-        private void _handleSpecialChar(string lastSymbol, char special, int successState)
-        {
-            _lastSymbol = lastSymbol;
-            _transitions[_state].Add(new Transition(_matchExact(special, successState)));
         }
         
         // TODO: Should _state actually just be a parameter of this method instead of a field?

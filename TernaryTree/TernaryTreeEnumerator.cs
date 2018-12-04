@@ -49,7 +49,6 @@ namespace TernaryTree
             {
                 Step firstStep = new Step(_createStep(_head, default(string)));
                 _nextStep.Push(firstStep);
-
             }
             string s = default(string);
             while(_nextStep.Count > 0 && string.IsNullOrEmpty(s))
