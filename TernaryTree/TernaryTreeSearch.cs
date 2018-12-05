@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Globalization;
 
 namespace TernaryTree
 {
@@ -143,7 +144,7 @@ namespace TernaryTree
             if (pos + 1 < pattern.Length)
             {
                 // If there's more pattern to match, then the repeating match shouldn't also transition forward.
-                // (It should only loop - which is added below.)
+                // (It should only loop, which is added below.)
                 // TODO: Instead of doing this finicky delete, is there some way to just decorate the other transitions so that they return a different result?
                 // See the prefix match decorator used above.
                 _transitions[_transitions.Count - 1].RemoveAt(_transitions[_transitions.Count - 1].Count - 1);
@@ -288,9 +289,22 @@ namespace TernaryTree
                     //    break;
                     //case 'u':
                     //    break;
-                    // TODO: Should there be a class that just returns collection of character groups?
-                    // Could be a static class with a property for each group (e.g. word, non-word, punctuation, etc.)
-                    // This would make it easy to call _matchAnyOf() to build state for these escapes.
+                    //case 'p':
+                    //    break;
+                    //case 'P':
+                    //    break;
+                    //case 'w':
+                    //    break;
+                    //case 'W':
+                    //    break;
+                    //case 's':
+                    //    break;
+                    //case 'S':
+                    //    break;
+                    //case 'd':
+                    //    break;
+                    //case 'D':
+                    //    break;
                     default:
                         _specialCharExactMatch($"\\{pattern[pos]}", pattern[pos], successState);
                         break;
@@ -474,6 +488,32 @@ namespace TernaryTree
                 return successState;
             }
         };
+
+        private Func<Node<V>, string, int> _matchUnicodeCategory(
+            ICollection<UnicodeCategory> matchingCategories, int successState) => (node, key) =>
+            {
+                foreach (UnicodeCategory matchingCategory in matchingCategories)
+                {
+                    if (CharUnicodeInfo.GetUnicodeCategory(node.Value) == matchingCategory)
+                    {
+                        return successState;
+                    }
+                }
+                return -1;
+            };
+
+        private Func<Node<V>, string, int> _matchAnythingButUnicodeCategory(
+            ICollection<UnicodeCategory> matchingCategories, int successState) => (node, key) =>
+            {
+                foreach (UnicodeCategory matchingCategory in matchingCategories)
+                {
+                    if (CharUnicodeInfo.GetUnicodeCategory(node.Value) == matchingCategory)
+                    {
+                        return -1;
+                    }
+                }
+                return successState;
+            };
 
         private char _getMinChar(char a, char b) => a <= b ? a : b;
 
