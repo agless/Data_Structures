@@ -74,10 +74,7 @@ namespace TernaryTree
                     pos = _handleDot(pos, pattern, successState);
                     break;
                 case '\\':
-                    int startPos = pos;
-                    pos = _getEscapeChar(pos, pattern, out char d);
-                    _handleLiteral(0, d.ToString(), successState);
-                    _lastSymbol = pattern.Substring(startPos, pos - startPos + 1);
+                    pos = _handleEscape(pos, pattern, successState);
                     break;
                 //case '^':
                 //case '$':
@@ -232,9 +229,8 @@ namespace TernaryTree
             return ++pos;
         }
 
-        private int _getEscapeChar(int pos, string pattern, out char c)
+        private int _handleEscape(int pos, string pattern, int successState)
         {
-            c = default(char);
             if (pos == pattern.Length - 1)
             {
                 _throwSyntaxError(pos, pattern);
@@ -256,35 +252,35 @@ namespace TernaryTree
                 {
                     _throwSyntaxError(pos, pattern);
                 }
-                // TODO: convert the octal string to the char it represents
+                // TODO: convert the octal string to the char it represents and add a match exact
             }
             else
             {
                 switch (pattern[pos])
                 {
                     case 'a':
-                        c = '\u0007';
+                        _specialCharExactMatch("\\a", '\u0007', successState);
                         break;
                     case 'b':
-                        c = '\u0008';
+                        _specialCharExactMatch("\\b", '\u0008', successState);
                         break;
                     case 't':
-                        c = '\u0009';
+                        _specialCharExactMatch("\\t", '\u0009', successState);
                         break;
                     case 'r':
-                        c = '\u000D';
+                        _specialCharExactMatch("\\r", '\u000D', successState);
                         break;
                     case 'v':
-                        c = '\u000B';
+                        _specialCharExactMatch("\\v", '\u000B', successState);
                         break;
                     case 'f':
-                        c = '\u000C';
+                        _specialCharExactMatch("\\f", '\u000C', successState);
                         break;
                     case 'n':
-                        c = '\u000A';
+                        _specialCharExactMatch("\\n", '\u000A', successState);
                         break;
                     case 'e':
-                        c = '\u001B';
+                        _specialCharExactMatch("\\e", '\u001B', successState);
                         break;
                     //case 'x': 
                     //    break;
@@ -292,14 +288,23 @@ namespace TernaryTree
                     //    break;
                     //case 'u':
                     //    break;
+                    // TODO: Should there be a class that just returns collection of character groups?
+                    // Could be a static class with a property for each group (e.g. word, non-word, punctuation, etc.)
+                    // This would make it easy to call _matchAnyOf() to build state for these escapes.
                     default:
-                        c = pattern[pos];
+                        _specialCharExactMatch($"\\{pattern[pos]}", pattern[pos], successState);
                         break;
                 }
             }
             return ++pos;
         }
-        
+
+        private void _specialCharExactMatch(string lastSymbol, char special, int successState)
+        {
+            _lastSymbol = lastSymbol;
+            _transitions[_state].Add(new Transition(_matchExact(special, successState)));
+        }
+
         // TODO: Should _state actually just be a parameter of this method instead of a field?
         // Would also have to be a parameter of the state builder method.  Could make things easier, though.
         private void _getBranchMatches(Node<V> node, string key)
