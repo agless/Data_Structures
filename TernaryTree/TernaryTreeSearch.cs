@@ -287,8 +287,11 @@ namespace TernaryTree
                     case 'e':
                         _specialCharExactMatch("\\e", '\u001B', successState);
                         break;
-                    //case 'x': 
-                    //    break;
+                    case 'x':
+                        _hexCharExactMatch(pos, pattern, successState);
+                        pos += 2;
+                        break;
+                    // TODO: The rest of these escape characters
                     //case 'c':
                     //    break;
                     //case 'u':
@@ -306,6 +309,7 @@ namespace TernaryTree
                     //case 'S':
                     //    break;
                     case 'd':
+                        _lastSymbol = "\\d";
                         List<UnicodeCategory> matchingCategories = new List<UnicodeCategory>
                         {
                             UnicodeCategory.DecimalDigitNumber
@@ -314,6 +318,7 @@ namespace TernaryTree
                             _matchUnicodeCategory(matchingCategories, successState)));
                         break;
                     case 'D':
+                        _lastSymbol = "\\D";
                         List<UnicodeCategory> nonMatchingCategories = new List<UnicodeCategory>
                         {
                             UnicodeCategory.DecimalDigitNumber
@@ -322,6 +327,7 @@ namespace TernaryTree
                             _matchAnythingButUnicodeCategory(nonMatchingCategories, successState)));
                         break;
                     default:
+                        _lastSymbol = $"\\{pattern[pos]}";
                         _specialCharExactMatch($"\\{pattern[pos]}", pattern[pos], successState);
                         break;
                 }
@@ -333,6 +339,16 @@ namespace TernaryTree
         {
             _lastSymbol = lastSymbol;
             _transitions[_state].Add(new Transition(_matchExact(special, successState)));
+        }
+
+        private void _hexCharExactMatch(int pos, string pattern, int successState)
+        {
+            if (pos > pattern.Length - 2)
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+            // TODO: Treat next two digits as hex and convert to char.
+            // TODO: Make an exact match transition for the char.
         }
 
         // TODO: Should _state actually just be a parameter of this method instead of a field?
