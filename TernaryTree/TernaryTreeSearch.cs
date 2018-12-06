@@ -301,10 +301,22 @@ namespace TernaryTree
                     //    break;
                     //case 'S':
                     //    break;
-                    //case 'd':
-                    //    break;
-                    //case 'D':
-                    //    break;
+                    case 'd':
+                        List<UnicodeCategory> matchingCategories = new List<UnicodeCategory>
+                        {
+                            UnicodeCategory.DecimalDigitNumber
+                        };
+                        _transitions[_state].Add(new Transition(
+                            _matchUnicodeCategory(matchingCategories, successState)));
+                        break;
+                    case 'D':
+                        List<UnicodeCategory> nonMatchingCategories = new List<UnicodeCategory>
+                        {
+                            UnicodeCategory.DecimalDigitNumber
+                        };
+                        _transitions[_state].Add(new Transition(
+                            _matchAnythingButUnicodeCategory(nonMatchingCategories, successState)));
+                        break;
                     default:
                         _specialCharExactMatch($"\\{pattern[pos]}", pattern[pos], successState);
                         break;
@@ -503,11 +515,11 @@ namespace TernaryTree
             };
 
         private Func<Node<V>, string, int> _matchAnythingButUnicodeCategory(
-            ICollection<UnicodeCategory> matchingCategories, int successState) => (node, key) =>
+            ICollection<UnicodeCategory> nonMatchingCategories, int successState) => (node, key) =>
             {
-                foreach (UnicodeCategory matchingCategory in matchingCategories)
+                foreach (UnicodeCategory nonMatchingCategory in nonMatchingCategories)
                 {
-                    if (CharUnicodeInfo.GetUnicodeCategory(node.Value) == matchingCategory)
+                    if (CharUnicodeInfo.GetUnicodeCategory(node.Value) == nonMatchingCategory)
                     {
                         return -1;
                     }
