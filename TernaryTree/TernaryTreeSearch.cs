@@ -13,6 +13,8 @@ namespace TernaryTree
         private string _lastSymbol;
         private List<string> _matches;
 
+        #region Constructor and Public Method
+
         /// <summary>
         /// 
         /// </summary>
@@ -40,6 +42,8 @@ namespace TernaryTree
             _getBranchMatches(head, default(string));
             return _matches;
         }
+
+        #endregion
 
         #region Private Methods
 

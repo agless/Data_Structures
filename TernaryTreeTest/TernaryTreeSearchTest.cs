@@ -105,6 +105,20 @@ namespace TernaryTreeTest
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
+        [TestCase(@"\d", new string[] { "1", "2", "3" }, new string[] { "a", "b", "c" })]
+        [TestCase(@"\d\d\d", new string[] { "123", "911", "000" }, new string[] { "abc", "14A", "AAA" })]
+        public void escape_d(string pattern, string[] matchingKeys, string [] nonMatchingKeys)
+        {
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
+        }
+
+        [TestCase(@"\D", new string[] { "a", "b", "c" }, new string[] { "1", "2", "3" })]
+        [TestCase(@"\D\D\D", new string[] { "___", "   ", "\r\nA" }, new string[] { "123", "456", "789" })]
+        public void escape_D(string pattern, string [] matchingKeys, string [] nonMatchingKeys)
+        {
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
+        }
+
         [TestCase("*........")]
         [TestCase("....**....")]
         [TestCase("abcd[")]
