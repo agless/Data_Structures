@@ -357,7 +357,16 @@ namespace TernaryTree
             {
                 _throwSyntaxError(pos, pattern);
             }
-            char c = Convert.ToChar(charByte);
+            char c = default(char);
+            try
+            {
+                c = Convert.ToChar(charByte);
+
+            }
+            catch (FormatException)
+            {
+                _throwSyntaxError(pos, pattern);
+            }
             _transitions[_state].Add(new Transition(_matchExact(c, successState)));
             _lastSymbol = $"\\{hexString}";
         }
