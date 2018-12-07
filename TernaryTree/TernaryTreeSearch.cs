@@ -10,7 +10,7 @@ namespace TernaryTree
         private delegate int Transition(Node<V> node, string key);
         private List<List<Transition>> _transitions;
         private int _state;
-        private string _lastSymbol;
+        private string _lastSymbol;  // TODO: Get rid of this field.  We're always setting it, but it's only used once.  Figure it out inside the method.  (Walk backwards.)
         private List<string> _matches;
 
         #region Constructor and Public Method
@@ -343,12 +343,23 @@ namespace TernaryTree
 
         private void _hexCharExactMatch(int pos, string pattern, int successState)
         {
-            if (pos > pattern.Length - 2)
+            if (++pos > pattern.Length - 2)
             {
                 _throwSyntaxError(pos, pattern);
             }
-            // TODO: Treat next two digits as hex and convert to char.
-            // TODO: Make an exact match transition for the char.
+            string hexString = pattern.Substring(pos, 2);
+            byte charByte = default(byte);
+            try
+            {
+                charByte = Convert.ToByte(hexString, 16);
+            }
+            catch (FormatException)
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+            char c = Convert.ToChar(charByte);
+            _transitions[_state].Add(new Transition(_matchExact(c, successState)));
+            _lastSymbol = $"\\{hexString}";
         }
 
         // TODO: Should _state actually just be a parameter of this method instead of a field?

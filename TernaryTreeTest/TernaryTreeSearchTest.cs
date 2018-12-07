@@ -119,10 +119,18 @@ namespace TernaryTreeTest
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
+        [TestCase(@"\x61", new string[] { "a" }, new string[] { "b" })]
+        [TestCase(@"\x77\x6F\x72\x6B\x69\x6E\x67", new string[] { "working" }, new string[] { "not working" })]
+        public void Escape_x(string pattern, string [] matchingKeys, string [] nonMatchingKeys)
+        {
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
+        }
+
         [TestCase("*........")]
         [TestCase("....**....")]
         [TestCase("abcd[")]
         [TestCase("[abcdef")]
+        [TestCase(@"\xzz")]
         public void Throws_ArgumentException_For_Bad_Pattern(string pattern)
         {
             TernaryTree<int> subject = new TernaryTree<int>();
