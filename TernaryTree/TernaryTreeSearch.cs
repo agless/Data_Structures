@@ -309,22 +309,16 @@ namespace TernaryTree
                     //case 'S':
                     //    break;
                     case 'd':
-                        _lastSymbol = "\\d";
+                    case 'D':
+                        _lastSymbol = (pattern[pos] == 'd') ? "\\d" : "\\D";
                         List<UnicodeCategory> matchingCategories = new List<UnicodeCategory>
                         {
                             UnicodeCategory.DecimalDigitNumber
                         };
-                        _transitions[_state].Add(new Transition(
-                            _matchUnicodeCategory(matchingCategories, successState)));
-                        break;
-                    case 'D':
-                        _lastSymbol = "\\D";
-                        List<UnicodeCategory> nonMatchingCategories = new List<UnicodeCategory>
-                        {
-                            UnicodeCategory.DecimalDigitNumber
-                        };
-                        _transitions[_state].Add(new Transition(
-                            _matchAnythingButUnicodeCategory(nonMatchingCategories, successState)));
+                        Transition t = (pattern[pos] == 'd') ?
+                            new Transition(_matchUnicodeCategory(matchingCategories, successState)) :
+                            new Transition(_matchAnythingButUnicodeCategory(matchingCategories, successState));
+                        _transitions[_state].Add(t);
                         break;
                     default:
                         _lastSymbol = $"\\{pattern[pos]}";
