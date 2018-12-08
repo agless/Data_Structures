@@ -243,13 +243,15 @@ namespace TernaryTree
             if (pattern[++pos] >= '0' && pattern[pos] <= '7')
             {
                 // TODO: Should I include this?  Regex reference page talks about octal escape, but it's not available in C#.
-                string octal;
-                if ((pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7') &&
+                string octal = default(string);
+                if ((pos <= pattern.Length - 3) &&
+                    (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7') &&
                     (pattern[pos + 2] >= '0' && pattern[pos + 2] <= '7'))
                 {
                     octal = pattern.Substring(pos, 3);
                 }
-                else if (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7')
+                else if ((pos <= pattern.Length - 2) && 
+                    (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7'))
                 {
                     octal = pattern.Substring(pos, 2);
                 }
@@ -257,7 +259,17 @@ namespace TernaryTree
                 {
                     _throwSyntaxError(pos, pattern);
                 }
-                // TODO: convert the octal string to the char it represents and add a match exact
+                try
+                {
+                    int charInt = Convert.ToInt32(octal, 8);
+                    char c = Convert.ToChar(charInt);
+                    _transitions[_state].Add(new Transition(_matchExact(c, successState)));
+                    pos += octal.Length - 1;
+                }
+                catch (FormatException)
+                {
+                    _throwSyntaxError(pos, pattern);
+                }
             }
             else
             {

@@ -126,6 +126,13 @@ namespace TernaryTreeTest
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
+        [TestCase(@"\040", new string[] { " " }, new string[] { "a", "b", "c" })]
+        [TestCase(@"\10", new string[] { "\b" }, new string[] { "a", "b", "c" })]
+        public void Escape_nnn_octal(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
+        {
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
+        } 
+
         [TestCase("*........")]
         [TestCase("....**....")]
         [TestCase("abcd[")]
