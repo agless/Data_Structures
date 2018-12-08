@@ -300,14 +300,18 @@ namespace TernaryTree
                         _specialCharExactMatch("\\e", '\u001B', successState);
                         break;
                     case 'x':
-                        _hexCharExactMatch(pos, pattern, successState);
+                        _hexCharExactMatch(pos, 2, pattern, successState);
+                        _lastSymbol = pattern.Substring(pos - 1, 4);
                         pos += 2;
                         break;
                     // TODO: The rest of these escape characters
                     //case 'c':
                     //    break;
-                    //case 'u':
-                    //    break;
+                    case 'u':
+                        _hexCharExactMatch(pos, 4, pattern, successState);
+                        _lastSymbol = pattern.Substring(pos - 1, 6);
+                        pos += 4;
+                        break;
                     //case 'p':
                     //    break;
                     //case 'P':
@@ -347,35 +351,23 @@ namespace TernaryTree
             _transitions[_state].Add(new Transition(_matchExact(special, successState)));
         }
 
-        private void _hexCharExactMatch(int pos, string pattern, int successState)
+        private void _hexCharExactMatch(int pos, int len, string pattern, int successState)
         {
-            // TODO: Clean this method up.  See octal match above.
-            if (++pos > pattern.Length - 2)
+            if (++pos > pattern.Length - len)
             {
                 _throwSyntaxError(pos, pattern);
             }
-            string hexString = pattern.Substring(pos, 2);
-            byte charByte = default(byte);
             try
             {
-                charByte = Convert.ToByte(hexString, 16);
+                string hexString = pattern.Substring(pos, len);
+                byte charByte = Convert.ToByte(hexString, 16);
+                char c = Convert.ToChar(charByte);
+                _transitions[_state].Add(new Transition(_matchExact(c, successState)));
             }
             catch (FormatException)
             {
                 _throwSyntaxError(pos, pattern);
             }
-            char c = default(char);
-            try
-            {
-                c = Convert.ToChar(charByte);
-
-            }
-            catch (FormatException)
-            {
-                _throwSyntaxError(pos, pattern);
-            }
-            _transitions[_state].Add(new Transition(_matchExact(c, successState)));
-            _lastSymbol = $"\\{hexString}";
         }
 
         // TODO: Should _state actually just be a parameter of this method instead of a field?
