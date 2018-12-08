@@ -5,11 +5,9 @@ using System.Text;
 
 namespace TernaryTree
 {
-    // TODO: Logging?
     // TODO: Error Handling and Documentation.  Follow Microsoft lead with interfaces.
     // TODO: More unit tests.  Check line coverage.
-    // TODO: What if you try to add a string with line-ending (or other special) characters?
-    // TODO: If we stored a KeyValuePair at Node.Data, we could do away with all the string building. Is this preferrable?
+    // TODO: Consider storing a KeyValuePair at node.Data.  This would do away with all the string building.
 
     /// <summary>
     /// Provides a structure for storing key value pairs.

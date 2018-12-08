@@ -54,6 +54,7 @@ namespace TernaryTree
             _matches = matches;
         }
 
+        // TODO: Refactor state building out to a seperate class.
         private void _buildState(int pos, string pattern)
         {
             while (pos < pattern.Length)
@@ -242,7 +243,6 @@ namespace TernaryTree
             }
             if (pattern[++pos] >= '0' && pattern[pos] <= '7')
             {
-                // TODO: Should I include this?  Regex reference page talks about octal escape, but it's not available in C#.
                 string octal = default(string);
                 if ((pos <= pattern.Length - 3) &&
                     (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7') &&
@@ -349,6 +349,7 @@ namespace TernaryTree
 
         private void _hexCharExactMatch(int pos, string pattern, int successState)
         {
+            // TODO: Clean this method up.  See octal match above.
             if (++pos > pattern.Length - 2)
             {
                 _throwSyntaxError(pos, pattern);
@@ -453,6 +454,8 @@ namespace TernaryTree
         #endregion
 
         #region Delegate Factories
+
+        // TODO: Refactor delegate factories out to a separate class
 
         private Func<Node<V>, string, int> _prefixMatchDecorator(Transition t) => (node, key) =>
         {
