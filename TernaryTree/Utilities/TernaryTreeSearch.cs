@@ -8,8 +8,8 @@ namespace TernaryTree
 {
     public class TernaryTreeSearch<V>
     {
-        private delegate int Transition(Node<V> node, string key);
-        private List<List<Transition>> _transitions;
+        private delegate int Transition(Node<V> node, string key); // move this to the state builder class
+        private List<List<Transition>> _transitions; // no need to define the delegate here, just specify the shape
         private int _state;
         private string _lastSymbol;  // TODO: Get rid of this field.  We're always setting it, but it's only used once.  Figure it out inside the method.  (Walk backwards.)
         private List<string> _matches;
@@ -37,10 +37,10 @@ namespace TernaryTree
         /// </summary>
         /// <param name="head"></param>
         /// <returns></returns>
-        public ICollection<string> Match(Node<V> head)
+        public ICollection<string> Match(TernaryTree<V> tree)
         {
-            _ = head ?? throw new ArgumentNullException(nameof(head));
-            _getBranchMatches(head, default(string));
+            _ = tree ?? throw new ArgumentNullException(nameof(tree));
+            _getBranchMatches(tree.Head, default(string));
             return _matches;
         }
 

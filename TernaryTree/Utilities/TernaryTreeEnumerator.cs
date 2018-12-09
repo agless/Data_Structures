@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace TernaryTree
 {
-    class TernaryTreeEnumerator<V> : IEnumerator<KeyValuePair<string, V>>, IEnumerator
+    public class TernaryTreeEnumerator<V> : IEnumerator<KeyValuePair<string, V>>, IEnumerator
     {
         private delegate string Step();
         private Stack<Step> _nextStep = new Stack<Step>();
@@ -13,10 +13,10 @@ namespace TernaryTree
         private bool _isInitialized = false;
         private string _currentKey;
 
-        public TernaryTreeEnumerator(TernaryTree<V> tree, Node<V> head)
+        public TernaryTreeEnumerator(TernaryTree<V> tree)
         {
             _tree = tree ?? throw new ArgumentNullException(nameof(tree));
-            _head = head ?? throw new ArgumentNullException(nameof(head));
+            _head = _tree.Head;
         }
 
         /// <summary>

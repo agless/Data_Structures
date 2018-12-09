@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TernaryTree
 {
-    public class Node<V>
+    internal class Node<V>
     {
         /// <summary>
         /// The character that this <see cref="Node"/> represents.

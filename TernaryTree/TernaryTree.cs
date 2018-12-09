@@ -27,7 +27,7 @@ namespace TernaryTree
         /// <summary>
         /// An entry point to the data structure.
         /// </summary>
-        private Node<V> _head;
+        internal Node<V> Head;
 
         /// <summary>
         /// Gets the number of keys in the <see cref="TernaryTree"/>.
@@ -132,7 +132,7 @@ namespace TernaryTree
                 {
                     throw new IndexOutOfRangeException();
                 }
-                _getKeyAtIndex(_head, new StringBuilder(), ref index, out string s);
+                _getKeyAtIndex(Head, new StringBuilder(), ref index, out string s);
                 return s;
             }
         }
@@ -148,7 +148,7 @@ namespace TernaryTree
         public ICollection<string> Keys()
         {
             List<string> _keyList = new List<string>();
-            _getBranchKeys(_head, new StringBuilder(), _keyList);
+            _getBranchKeys(Head, new StringBuilder(), _keyList);
             return _keyList;
         }
 
@@ -159,7 +159,7 @@ namespace TernaryTree
         public ICollection<V> Values()
         {
             List<V> _valueList = new List<V>();
-            _getBranchValues(_head, _valueList);
+            _getBranchValues(Head, _valueList);
             return _valueList;
         }
 
@@ -171,7 +171,7 @@ namespace TernaryTree
         public ICollection<string> Match(string pattern)
         {
             TernaryTreeSearch<V> search = new TernaryTreeSearch<V>(pattern);
-            return search.Match(_head);
+            return search.Match(this);
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace TernaryTree
         /// <param name="pattern">A <see cref="TernaryTreeSearch{V}"/> 
         /// which has been configured to match a regular expression.</param>
         /// <returns>A collection of keys matchig the regular expression.</returns>
-        public ICollection<string> Match(TernaryTreeSearch<V> pattern) => pattern.Match(_head);
+        public ICollection<string> Match(TernaryTreeSearch<V> pattern) => pattern.Match(this);
 
         /// <summary>
         /// 
@@ -190,7 +190,7 @@ namespace TernaryTree
         public ICollection<string> MatchPrefix(string prefix)
         {
             List<string> keys = new List<string>();
-            Node<V> node = _getFinalNode(prefix, 0, _head);
+            Node<V> node = _getFinalNode(prefix, 0, Head);
             _getBranchKeys(node, new StringBuilder(), keys);
             return keys;
         }
@@ -213,7 +213,7 @@ namespace TernaryTree
         /// <returns></returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new TernaryTreeEnumerator<V>(this, _head);
+            return new TernaryTreeEnumerator<V>(this);
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace TernaryTree
         /// <returns></returns>
         IEnumerator<KeyValuePair<string, V>> IEnumerable<KeyValuePair<string, V>>.GetEnumerator()
         {
-            return new TernaryTreeEnumerator<V>(this, _head);
+            return new TernaryTreeEnumerator<V>(this);
         }
 
         #endregion
@@ -240,11 +240,11 @@ namespace TernaryTree
             {
                 throw new ArgumentException(nameof(key));
             }
-            if (_head == null)
+            if (Head == null)
             {
-                _head = new Node<V> { Value = key[0] };
+                Head = new Node<V> { Value = key[0] };
             }
-            Node<V> nd = _insertKey(key, 0, _head) ?? throw new ArgumentException(nameof(key));
+            Node<V> nd = _insertKey(key, 0, Head) ?? throw new ArgumentException(nameof(key));
             nd.Data = value;
             Count++;
         }
@@ -261,7 +261,7 @@ namespace TernaryTree
         /// </summary>
         public void Clear()
         {
-            _head = null;
+            Head = null;
             Count = 0;
         }
 
@@ -280,7 +280,7 @@ namespace TernaryTree
             {
                 return false;
             }
-            Node<V> node = _getFinalNode(key, 0, _head);
+            Node<V> node = _getFinalNode(key, 0, Head);
             if (node == null)
             {
                 return false;
@@ -333,7 +333,7 @@ namespace TernaryTree
                 throw new ArgumentException($"{nameof(array)} does not have sufficient space");
             }
             List<string> keys = new List<string>();
-            _getBranchKeys(_head, new StringBuilder(), keys);
+            _getBranchKeys(Head, new StringBuilder(), keys);
             for (int i = 0; i < keys.Count; i++)
             {
                 TryGetValue(keys[i], out V value);
@@ -353,7 +353,7 @@ namespace TernaryTree
             {
                 throw new ArgumentException(nameof(key));
             }
-            Node<V> node = _getFinalNode(key, 0, _head);
+            Node<V> node = _getFinalNode(key, 0, Head);
             if (node == null)
             {
                 return false;
@@ -383,7 +383,7 @@ namespace TernaryTree
         /// <returns></returns>
         public bool TryGetValue(string key, out V value)
         {
-            Node<V> node = _getFinalNode(key, 0, _head);
+            Node<V> node = _getFinalNode(key, 0, Head);
             if (node != null)
             {
                 value = node.Data;
