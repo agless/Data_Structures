@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace TernaryTree
 {
@@ -304,17 +305,17 @@ namespace TernaryTree
                         _lastSymbol = pattern.Substring(pos - 1, 4);
                         pos += 2;
                         break;
-                    // TODO: The rest of these escape characters
-                    //case 'c':
-                    //    break;
                     case 'u':
                         _hexCharExactMatch(pos, 4, pattern, successState);
                         _lastSymbol = pattern.Substring(pos - 1, 6);
                         pos += 4;
                         break;
-                    //case 'p':
-                    //    break;
-                    //case 'P':
+                    case 'p':
+                    case 'P':
+                        pos = _escapePp(pos, pattern, successState);
+                        break;
+                    // TODO: The rest of these escape characters
+                    //case 'c':
                     //    break;
                     //case 'w':
                     //    break;
@@ -326,16 +327,8 @@ namespace TernaryTree
                     //    break;
                     case 'd':
                     case 'D':
-                        _lastSymbol = (pattern[pos] == 'd') ? "\\d" : "\\D";
-                        List<UnicodeCategory> matchingCategories = new List<UnicodeCategory>
-                        {
-                            UnicodeCategory.DecimalDigitNumber
-                        };
-                        Transition t = (pattern[pos] == 'd') ?
-                            new Transition(_matchUnicodeCategory(matchingCategories, successState)) :
-                            new Transition(_matchAnythingButUnicodeCategory(matchingCategories, successState));
-                        _transitions[_state].Add(t);
-                        break;
+                        _escapeDd(pos, pattern, successState);
+                       break;
                     default:
                         _lastSymbol = $"\\{pattern[pos]}";
                         _specialCharExactMatch($"\\{pattern[pos]}", pattern[pos], successState);
@@ -370,6 +363,35 @@ namespace TernaryTree
             }
         }
 
+        private int _escapePp(int pos, string pattern, int successState)
+        {
+            int startPos = pos - 1;
+            while (pos < pattern.Length && pattern[pos] != '}')
+            {
+                pos++;
+            }
+            if (pattern[pos] != '}')
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+            _lastSymbol = pattern.Substring(startPos, pos - startPos + 1);
+            _transitions[_state].Add(new Transition(_matchUnicodeNamedBlock(_lastSymbol, successState)));
+            return pos;
+        }
+
+        private void _escapeDd(int pos, string pattern, int successState)
+        {
+            _lastSymbol = (pattern[pos] == 'd') ? "\\d" : "\\D";
+            List<UnicodeCategory> matchingCategories = new List<UnicodeCategory>
+                        {
+                            UnicodeCategory.DecimalDigitNumber
+                        };
+            Transition t = (pattern[pos] == 'd') ?
+                new Transition(_matchUnicodeCategory(matchingCategories, successState)) :
+                new Transition(_matchAnythingButUnicodeCategory(matchingCategories, successState));
+            _transitions[_state].Add(t);
+        }
+
         // TODO: Should _state actually just be a parameter of this method instead of a field?
         // Would also have to be a parameter of the state builder method.  Could make things easier, though.
         private void _getBranchMatches(Node<V> node, string key)
@@ -388,7 +410,7 @@ namespace TernaryTree
             string newKey = key + node.Value;
             foreach (Transition transition in _transitions[_state])
             {
-                int nextState = transition.Invoke(node, key);
+                int nextState = transition(node, key);
                 if (nextState > -1)
                 {
                     if (nextState == _transitions.Count && node.IsFinalNode)
@@ -451,7 +473,7 @@ namespace TernaryTree
 
         private Func<Node<V>, string, int> _prefixMatchDecorator(Transition t) => (node, key) =>
         {
-            int newState = t.Invoke(node, key);
+            int newState = t(node, key);
             if (newState > -1 && newState == _transitions.Count - 1)
             {
                 if (node.IsFinalNode)
@@ -470,7 +492,7 @@ namespace TernaryTree
 
         private Func<Node<V>, string, int> _checkValidKeyDecorator(Transition t) => (node, key) => 
         {
-            int newState = t.Invoke(node, key);
+            int newState = t(node, key);
             if (newState > -1 && node.IsFinalNode)
             {
                 _matches.Add(key + node.Value);
@@ -567,6 +589,18 @@ namespace TernaryTree
                 }
                 return successState;
             };
+
+        private Func<Node<V>, string, int> _matchUnicodeNamedBlock(string pattern, int successState) => (node, key) =>
+        {
+            // TODO: Is there another way to handle this? Don't really want to bring in System.Text.RegularExpression
+            // I mean, why write all this other custom code when we could do every comparison as a character-by-character Regex.IsMatch?
+            // TODO: Does this need a try / catch?
+            if (Regex.IsMatch(node.Value.ToString(), pattern))
+            {
+                return successState;
+            }
+            return -1;
+        };
 
         private char _getMinChar(char a, char b) => a <= b ? a : b;
 

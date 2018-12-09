@@ -138,7 +138,21 @@ namespace TernaryTreeTest
         public void Escape_nnn_octal(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
-        } 
+        }
+
+        [TestCase(@"\p{IsBasicLatin}", new string[] { "a", "A", "b", "B" }, new string[] { "\u2190", "\u2191", "\u2192" })]
+        [TestCase(@"\p{IsBasicLatin}\p{IsBasicLatin}\p{IsBasicLatin}", new string[] { "ABC", "abc", "XYZ", "xyz" }, new string[] { "\u2190", "\u2191", "\u2192" })]
+        public void Escape_p(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
+        {
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
+        }
+
+        [TestCase(@"\P{IsBasicLatin}", new string[] { "\u2190", "\u2191", "\u2192" }, new string[] { "a", "A", "b", "B" })]
+        [TestCase(@"\P{IsBasicLatin}\P{IsBasicLatin}\P{IsBasicLatin}", new string[] { "\u2190\u2191\u2192" }, new string[] { "ABC", "abc", "XYZ", "xyz" })]
+        public void Escape_P(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
+        {
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
+        }
 
         [TestCase("*........")]
         [TestCase("....**....")]
