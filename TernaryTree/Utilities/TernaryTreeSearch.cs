@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace TernaryTree
@@ -60,7 +59,6 @@ namespace TernaryTree
         {
             while (pos < pattern.Length)
             {
-                char c = pattern[pos];
                 while (_transitions.Count <= _state)
                 {
                     _transitions.Add(new List<Transition>());
@@ -314,21 +312,21 @@ namespace TernaryTree
                     case 'P':
                         pos = _escapePp(pos, pattern, successState);
                         break;
-                    // TODO: The rest of these escape characters
-                    //case 'c':
-                    //    break;
-                    //case 'w':
-                    //    break;
-                    //case 'W':
-                    //    break;
-                    //case 's':
-                    //    break;
-                    //case 'S':
-                    //    break;
+                    case 'w':
+                    case 'W':
+                        _escapeWw(pos, pattern, successState);
+                        break;
+                    case 's':
+                    case 'S':
+                        _escapeSs(pos, pattern, successState);
+                        break;
                     case 'd':
                     case 'D':
                         _escapeDd(pos, pattern, successState);
                        break;
+                    // TODO: Match ASCII control characters (will need another switch).
+                    //case 'c':
+                    //    break;
                     default:
                         _lastSymbol = $"\\{pattern[pos]}";
                         _specialCharExactMatch($"\\{pattern[pos]}", pattern[pos], successState);
@@ -375,21 +373,26 @@ namespace TernaryTree
                 _throwSyntaxError(pos, pattern);
             }
             _lastSymbol = pattern.Substring(startPos, pos - startPos + 1);
-            _transitions[_state].Add(new Transition(_matchUnicodeNamedBlock(_lastSymbol, successState)));
+            _transitions[_state].Add(new Transition(_matchWithSystemRegex(_lastSymbol, successState)));
             return pos;
         }
 
         private void _escapeDd(int pos, string pattern, int successState)
         {
             _lastSymbol = (pattern[pos] == 'd') ? "\\d" : "\\D";
-            List<UnicodeCategory> matchingCategories = new List<UnicodeCategory>
-                        {
-                            UnicodeCategory.DecimalDigitNumber
-                        };
-            Transition t = (pattern[pos] == 'd') ?
-                new Transition(_matchUnicodeCategory(matchingCategories, successState)) :
-                new Transition(_matchAnythingButUnicodeCategory(matchingCategories, successState));
-            _transitions[_state].Add(t);
+            _transitions[_state].Add(new Transition(_matchWithSystemRegex(_lastSymbol, successState)));
+        }
+
+        private void _escapeWw(int pos, string pattern, int successState)
+        {
+            _lastSymbol = (pattern[pos] == 'w') ? "\\w" : "\\W";
+            _transitions[_state].Add(new Transition(_matchWithSystemRegex(_lastSymbol, successState)));
+        }
+
+        private void _escapeSs(int pos, string pattern, int successState)
+        {
+            _lastSymbol = (pattern[pos] == 's') ? "\\s" : "\\S";
+            _transitions[_state].Add(new Transition(_matchWithSystemRegex(_lastSymbol, successState)));
         }
 
         // TODO: Should _state actually just be a parameter of this method instead of a field?
@@ -564,37 +567,11 @@ namespace TernaryTree
             }
         };
 
-        private Func<Node<V>, string, int> _matchUnicodeCategory(
-            ICollection<UnicodeCategory> matchingCategories, int successState) => (node, key) =>
-            {
-                foreach (UnicodeCategory matchingCategory in matchingCategories)
-                {
-                    if (CharUnicodeInfo.GetUnicodeCategory(node.Value) == matchingCategory)
-                    {
-                        return successState;
-                    }
-                }
-                return -1;
-            };
-
-        private Func<Node<V>, string, int> _matchAnythingButUnicodeCategory(
-            ICollection<UnicodeCategory> nonMatchingCategories, int successState) => (node, key) =>
-            {
-                foreach (UnicodeCategory nonMatchingCategory in nonMatchingCategories)
-                {
-                    if (CharUnicodeInfo.GetUnicodeCategory(node.Value) == nonMatchingCategory)
-                    {
-                        return -1;
-                    }
-                }
-                return successState;
-            };
-
-        private Func<Node<V>, string, int> _matchUnicodeNamedBlock(string pattern, int successState) => (node, key) =>
+        // Cop out? Maybe, but the the groundwork to do all the special character matching without 
+        // System.RegularExpressions seems to go beyond the scope of this project (which is not to 
+        // replace System, but to speed up regex matching over a collection).
+        private Func<Node<V>, string, int> _matchWithSystemRegex(string pattern, int successState) => (node, key) =>
         {
-            // TODO: Is there another way to handle this? Don't really want to bring in System.Text.RegularExpression
-            // I mean, why write all this other custom code when we could do every comparison as a character-by-character Regex.IsMatch?
-            // TODO: Does this need a try / catch?
             if (Regex.IsMatch(node.Value.ToString(), pattern))
             {
                 return successState;

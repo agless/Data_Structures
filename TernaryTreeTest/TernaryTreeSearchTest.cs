@@ -154,6 +154,34 @@ namespace TernaryTreeTest
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
+        [TestCase(@"\s", new string[] { " " }, new string[] { "a", "b", "c" })]
+        [TestCase(@"\s\s\s", new string[] { "   ", "\u2009  "}, new string[] { "abc", "123", "ABC" })]
+        public void Escape_s(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
+        {
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
+        }
+
+        [TestCase(@"\S", new string[] { "a", "b", "c" }, new string[] { " " })]
+        [TestCase(@"\S\S\S", new string[] { "abc", "123", "ABC" }, new string[] { "   ", "\u2009  " })]
+        public void Escape_S(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
+        {
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
+        }
+
+        [TestCase(@"\w", new string[] { "a", "b", "c" }, new string[] { "$", "@", " " })]
+        [TestCase(@"\w\w\w", new string[] { "abc", "123", "ABC" }, new string[] { "   ", "\u2009  " })]
+        public void Escape_w(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
+        {
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
+        }
+
+        [TestCase(@"\W", new string[] { " ", "$", "&" }, new string[] { "a", "b", "c" })]
+        [TestCase(@"\W\W\W", new string[] { "   ", "\u200B\u200B\u200B", "\u2009  " }, new string[] { "abc", "123", "ABC" })]
+        public void Escape_W(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
+        {
+            Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
+        }
+
         [TestCase("*........")]
         [TestCase("....**....")]
         [TestCase("abcd[")]
