@@ -241,33 +241,7 @@ namespace TernaryTree
             }
             if (pattern[++pos] >= '0' && pattern[pos] <= '7')
             {
-                string octal = default(string);
-                if ((pos <= pattern.Length - 3) &&
-                    (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7') &&
-                    (pattern[pos + 2] >= '0' && pattern[pos + 2] <= '7'))
-                {
-                    octal = pattern.Substring(pos, 3);
-                }
-                else if ((pos <= pattern.Length - 2) && 
-                    (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7'))
-                {
-                    octal = pattern.Substring(pos, 2);
-                }
-                else
-                {
-                    _throwSyntaxError(pos, pattern);
-                }
-                try
-                {
-                    int charInt = Convert.ToInt32(octal, 8);
-                    char c = Convert.ToChar(charInt);
-                    _transitions[_state].Add(new Transition(_matchExact(c, successState)));
-                    pos += octal.Length - 1;
-                }
-                catch (FormatException)
-                {
-                    _throwSyntaxError(pos, pattern);
-                }
+                pos = _handleOctal(pos, pattern, successState);
             }
             else
             {
@@ -334,6 +308,39 @@ namespace TernaryTree
             return ++pos;
         }
 
+        private int _handleOctal(int pos, string pattern, int successState)
+        {
+            string octal = default(string);
+            if ((pos <= pattern.Length - 3) &&
+                (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7') &&
+                (pattern[pos + 2] >= '0' && pattern[pos + 2] <= '7'))
+            {
+                octal = pattern.Substring(pos, 3);
+            }
+            else if ((pos <= pattern.Length - 2) &&
+                (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7'))
+            {
+                octal = pattern.Substring(pos, 2);
+            }
+            else
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+            try
+            {
+                int charInt = Convert.ToInt32(octal, 8);
+                char c = Convert.ToChar(charInt);
+                _transitions[_state].Add(new Transition(_matchExact(c, successState)));
+                _lastSymbol = $"\\{octal}";
+                pos += octal.Length - 1;
+            }
+            catch (FormatException)
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+            return pos;
+        }
+
         private void _specialCharExactMatch(string lastSymbol, char special, int successState)
         {
             _lastSymbol = lastSymbol;
@@ -342,11 +349,11 @@ namespace TernaryTree
 
         private void _hexCharExactMatch(int pos, int len, string pattern, int successState)
         {
-            _lastSymbol = pattern.Substring(pos - 1, len + 2);
             if (++pos > pattern.Length - len)
             {
                 _throwSyntaxError(pos, pattern);
             }
+            _lastSymbol = pattern.Substring(pos - 2, len + 2);
             try
             {
                 string hexString = pattern.Substring(pos, len);
