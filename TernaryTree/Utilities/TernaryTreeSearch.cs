@@ -70,8 +70,7 @@ namespace TernaryTree
 
         private int _switchNextSymbol(int pos, string pattern, int successState)
         {
-            char c = pattern[pos];
-            switch (c)
+            switch (pattern[pos])
             {
                 //TODO: Write private methods for each of these special characters.
                 //TODO: Case insensitive mode?
@@ -324,9 +323,10 @@ namespace TernaryTree
                     case 'D':
                         _escapeDd(pos, pattern, successState);
                        break;
-                    // TODO: Match ASCII control characters (will need another switch).
-                    //case 'c':
-                    //    break;
+                    case 'c':
+                        _asciiControl(pos, pattern, successState);
+                        pos++;
+                        break;
                     default:
                         _lastSymbol = $"\\{pattern[pos]}";
                         _specialCharExactMatch($"\\{pattern[pos]}", pattern[pos], successState);
@@ -393,6 +393,50 @@ namespace TernaryTree
         {
             _lastSymbol = (pattern[pos] == 's') ? "\\s" : "\\S";
             _transitions[_state].Add(new Transition(_matchWithSystemRegex(_lastSymbol, successState)));
+        }
+
+        private void _asciiControl(int pos, string pattern, int successState)
+        {
+            if (pos == pattern.Length - 1)
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+            string charString = pattern.Substring(pos + 1, 1);
+            charString = charString.ToLower();
+            char c = Convert.ToChar(charString);
+            char cAdjusted = default(char);
+            switch (c)
+            {
+                case '[':
+                    cAdjusted = (char)27;
+                    break;
+                case '\\':
+                    cAdjusted = (char)28;
+                    break;
+                case ']':
+                    cAdjusted = (char)29;
+                    break;
+                case '^':
+                    cAdjusted = (char)30;
+                    break;
+                case '_':
+                    cAdjusted = (char)31;
+                    break;
+                default:
+                    int cInt = c;
+                    cInt -= 60;
+                    try
+                    {
+                        cAdjusted = (char)cInt;
+                    }
+                    catch (OverflowException)
+                    {
+                        _throwSyntaxError(pos, pattern);
+                    }
+                    break;
+            }
+            _lastSymbol = pattern.Substring(pos - 1, 3);
+            _transitions[_state].Add(new Transition(_matchExact(cAdjusted, successState)));
         }
 
         // TODO: Should _state actually just be a parameter of this method instead of a field?
