@@ -299,12 +299,10 @@ namespace TernaryTree
                         break;
                     case 'x':
                         _hexCharExactMatch(pos, 2, pattern, successState);
-                        _lastSymbol = pattern.Substring(pos - 1, 4);
                         pos += 2;
                         break;
                     case 'u':
                         _hexCharExactMatch(pos, 4, pattern, successState);
-                        _lastSymbol = pattern.Substring(pos - 1, 6);
                         pos += 4;
                         break;
                     case 'p':
@@ -344,6 +342,7 @@ namespace TernaryTree
 
         private void _hexCharExactMatch(int pos, int len, string pattern, int successState)
         {
+            _lastSymbol = pattern.Substring(pos - 1, len + 2);
             if (++pos > pattern.Length - len)
             {
                 _throwSyntaxError(pos, pattern);
