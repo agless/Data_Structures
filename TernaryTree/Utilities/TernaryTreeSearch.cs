@@ -618,8 +618,7 @@ namespace TernaryTree
         };
 
         // Cop out? Maybe, but the the groundwork to do all the special character matching without 
-        // System.RegularExpressions seems to go beyond the scope of this project (which is not to 
-        // replace System, but to speed up regex matching over a collection).
+        // System.RegularExpressions seems to go beyond the scope of this project.
         private Func<Node<V>, string, int> _matchWithSystemRegex(string pattern, int successState) => (node, key) =>
         {
             if (Regex.IsMatch(node.Value.ToString(), pattern))
