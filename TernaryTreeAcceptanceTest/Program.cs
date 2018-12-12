@@ -33,7 +33,7 @@ namespace TernaryTreeAcceptanceTest
             List<string> keys = new List<string>();
             foreach (string tenant in tenants)
             {
-                Console.Write($"Generating 10,000 keys for tenant {tenant}.");
+                Console.Write($"Generating 10,000 keys for tenant {tenant}.  ");
                 Random random = new Random();
                 startTime = DateTime.Now.Ticks;
                 for (int i = 0; i < 10000; i++)
@@ -43,17 +43,17 @@ namespace TernaryTreeAcceptanceTest
                     keys.Add(key);
                 }
                 endTime = DateTime.Now.Ticks;
-                Console.Write($"Took {(endTime - startTime) / 10000} ms." + Environment.NewLine + Environment.NewLine);
+                Console.Write($"Took {(endTime - startTime) / 10000} ms." + Environment.NewLine);
             }
 
-            Console.Write("Adding all keys to TernaryTree.");
+            Console.Write(Environment.NewLine + "Adding all keys to TernaryTree.  ");
             startTime = DateTime.Now.Ticks;
             TernaryTree<int> subject = TernaryTree<int>.Create(keys);
             endTime = DateTime.Now.Ticks;
             Console.WriteLine($"Took {(endTime - startTime) / 10000} ms." + Environment.NewLine + Environment.NewLine);
 
-            Console.Write("Finding all invoices for ABC Co.: \"ABC Co\\..*\" " + Environment.NewLine);
             string pattern = @"ABC Co\..*";
+            Console.Write($"Finding all records for ABC Co.: {pattern}" + Environment.NewLine + Environment.NewLine);
             Console.WriteLine("Running System regex across list.");
             startTime = DateTime.Now.Ticks;
             int count = 0;
@@ -72,6 +72,7 @@ namespace TernaryTreeAcceptanceTest
             endTime = DateTime.Now.Ticks;
             Console.WriteLine($"Found {results.Count} keys in {(endTime - startTime) / 10000} ms." + Environment.NewLine + Environment.NewLine);
 
+            // TODO:  Write an input loop to accept regex and run the above comparison on the pattern.
             Console.ReadLine();
         }
     }
