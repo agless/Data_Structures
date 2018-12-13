@@ -8,8 +8,8 @@ namespace TernaryTree
 {
     public class TernaryTreeSearch<V>
     {
-        private delegate int Transition(Node<V> node, string key); // move this to the state builder class
-        private List<List<Transition>> _transitions; // no need to define the delegate here, just specify the shape
+        private delegate int Transition(Node<V> node, string key); // TODO: Move this to a state builder class
+        private List<List<Transition>> _transitions; // TODO: No need to name the delegate here, just specify the shape
         private int _state;
         private string _lastSymbol;  // TODO: Get rid of this field.  We're always setting it, but it's only used once.  Figure it out inside the method.  (Walk backwards.)
         private List<string> _matches;
