@@ -42,14 +42,14 @@ namespace TernaryTreeAcceptanceTest
                 for (int i = 0; i < numKeys / 5; i++)
                 {
                     int docType = random.Next(0, docTypes.Length);
-                    string key = $"{tenant}.{docTypes[docType]}.{Guid.NewGuid()}";
+                    string key = $"{tenant}-{docTypes[docType]}-{Guid.NewGuid()}";
                     keys.Add(key);
                 }
                 endTime = DateTime.Now.Ticks;
                 Console.Write($"Took {(endTime - startTime) / 10000} ms." + Environment.NewLine);
             }
 
-            Console.Write(Environment.NewLine + "Adding all keys to TernaryTree.  ");
+            Console.Write(Environment.NewLine + $"Adding {numKeys} keys to TernaryTree.  ");
             startTime = DateTime.Now.Ticks;
             subject = TernaryTree<int>.Create(keys);
             endTime = DateTime.Now.Ticks;

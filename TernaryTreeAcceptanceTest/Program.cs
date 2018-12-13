@@ -47,6 +47,7 @@ namespace TernaryTreeAcceptanceTest
                 {
                     Environment.Exit(0);
                 }
+                // TODO:  Add try/catch for bad pattern
                 runner.RunTernaryTreeSearch(pattern);
                 runner.RunSystemRegex(pattern);
                 Console.Write(Environment.NewLine + Environment.NewLine);
