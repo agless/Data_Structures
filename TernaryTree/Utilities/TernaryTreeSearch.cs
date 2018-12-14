@@ -26,10 +26,8 @@ namespace TernaryTree
                 throw new ArgumentNullException(nameof(pattern));
             }
             _transitions = new List<List<Transition>>();
-            string pre, post;
-            pre = (pattern.Substring(0, 2) == ".*") ? default(string) : ".*";
-            post = (pattern.Substring(pattern.Length - 2, 2) == ".*") ? default(string) : ".*";
-            pattern = $"{pre}{pattern}{post}";
+            pattern = (pattern.Substring(0, 2) == ".*") ? pattern : ".*" + pattern;
+            pattern = (pattern.Substring(pattern.Length - 2, 2) == ".*") ? pattern : pattern + ".*";
             _buildState(0, pattern);
             _matches = new List<string>();
             _state = 0;
@@ -50,13 +48,6 @@ namespace TernaryTree
         #endregion
 
         #region Private Methods
-
-        private TernaryTreeSearch(ref List<List<Transition>> transitions, ref List<string> matches, int state)
-        {
-            _transitions = transitions;
-            _state = state;
-            _matches = matches;
-        }
 
         // TODO: Refactor state building out to a seperate class.
         private void _buildState(int pos, string pattern)
@@ -457,13 +448,12 @@ namespace TernaryTree
             {
                 return;
             }
+            int oldState = _state;
             if (node.Smaller != null)
             {
-                // TODO: Why construct a new object here?  Why not just go down the branch recursively and restore oldState after?
-                TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(ref _transitions, ref _matches, _state);
-                tts._getBranchMatches(node.Smaller, key);
+                _getBranchMatches(node.Smaller, key);
+                _state = oldState;
             }
-            int oldState = _state;
             string newKey = key + node.Value;
             foreach (Transition transition in _transitions[_state])
             {

@@ -63,7 +63,7 @@ namespace TernaryTreeTest
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
-        [TestCase("th.*", new string[] { "this", "these", "those" }, new string[] { "nothing", "in", "here" })]
+        [TestCase("th.*", new string[] { "this", "these", "those" }, new string[] { "not", "in", "here" })]
         public void Prefix_Exact(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
@@ -120,14 +120,14 @@ namespace TernaryTreeTest
         }
 
         [TestCase(@"\x61", new string[] { "a" }, new string[] { "b" })]
-        [TestCase(@"\x77\x6F\x72\x6B\x69\x6E\x67", new string[] { "working" }, new string[] { "not working" })]
+        [TestCase(@"\x77\x6F\x72\x6B\x69\x6E\x67", new string[] { "working" }, new string[] { "not" })]
         public void Escape_x(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase(@"\u0061", new string[] { "a" }, new string[] { "b" })]
-        [TestCase(@"\u0077\u006F\u0072\u006B\u0069\u006E\u0067", new string[] { "working" }, new string[] { "not working" })]
+        [TestCase(@"\u0077\u006F\u0072\u006B\u0069\u006E\u0067", new string[] { "working" }, new string[] { "not" })]
         public void Escape_u(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
