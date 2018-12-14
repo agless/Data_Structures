@@ -26,6 +26,10 @@ namespace TernaryTree
                 throw new ArgumentNullException(nameof(pattern));
             }
             _transitions = new List<List<Transition>>();
+            string pre, post;
+            pre = (pattern.Substring(0, 2) == ".*") ? default(string) : ".*";
+            post = (pattern.Substring(pattern.Length - 2, 2) == ".*") ? default(string) : ".*";
+            pattern = $"{pre}{pattern}{post}";
             _buildState(0, pattern);
             _matches = new List<string>();
             _state = 0;
