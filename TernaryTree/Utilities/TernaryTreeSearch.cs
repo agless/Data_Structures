@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace TernaryTree
@@ -60,7 +59,6 @@ namespace TernaryTree
         {
             while (pos < pattern.Length)
             {
-                char c = pattern[pos];
                 while (_transitions.Count <= _state)
                 {
                     _transitions.Add(new List<Transition>());
@@ -72,8 +70,7 @@ namespace TernaryTree
 
         private int _switchNextSymbol(int pos, string pattern, int successState)
         {
-            char c = pattern[pos];
-            switch (c)
+            switch (pattern[pos])
             {
                 //TODO: Write private methods for each of these special characters.
                 //TODO: Case insensitive mode?
@@ -244,33 +241,7 @@ namespace TernaryTree
             }
             if (pattern[++pos] >= '0' && pattern[pos] <= '7')
             {
-                string octal = default(string);
-                if ((pos <= pattern.Length - 3) &&
-                    (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7') &&
-                    (pattern[pos + 2] >= '0' && pattern[pos + 2] <= '7'))
-                {
-                    octal = pattern.Substring(pos, 3);
-                }
-                else if ((pos <= pattern.Length - 2) && 
-                    (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7'))
-                {
-                    octal = pattern.Substring(pos, 2);
-                }
-                else
-                {
-                    _throwSyntaxError(pos, pattern);
-                }
-                try
-                {
-                    int charInt = Convert.ToInt32(octal, 8);
-                    char c = Convert.ToChar(charInt);
-                    _transitions[_state].Add(new Transition(_matchExact(c, successState)));
-                    pos += octal.Length - 1;
-                }
-                catch (FormatException)
-                {
-                    _throwSyntaxError(pos, pattern);
-                }
+                pos = _handleOctal(pos, pattern, successState);
             }
             else
             {
@@ -302,33 +273,32 @@ namespace TernaryTree
                         break;
                     case 'x':
                         _hexCharExactMatch(pos, 2, pattern, successState);
-                        _lastSymbol = pattern.Substring(pos - 1, 4);
                         pos += 2;
                         break;
                     case 'u':
                         _hexCharExactMatch(pos, 4, pattern, successState);
-                        _lastSymbol = pattern.Substring(pos - 1, 6);
                         pos += 4;
                         break;
                     case 'p':
                     case 'P':
                         pos = _escapePp(pos, pattern, successState);
                         break;
-                    // TODO: The rest of these escape characters
-                    //case 'c':
-                    //    break;
-                    //case 'w':
-                    //    break;
-                    //case 'W':
-                    //    break;
-                    //case 's':
-                    //    break;
-                    //case 'S':
-                    //    break;
+                    case 'w':
+                    case 'W':
+                        _escapeWw(pos, pattern, successState);
+                        break;
+                    case 's':
+                    case 'S':
+                        _escapeSs(pos, pattern, successState);
+                        break;
                     case 'd':
                     case 'D':
                         _escapeDd(pos, pattern, successState);
                        break;
+                    case 'c':
+                        _asciiControl(pos, pattern, successState);
+                        pos++;
+                        break;
                     default:
                         _lastSymbol = $"\\{pattern[pos]}";
                         _specialCharExactMatch($"\\{pattern[pos]}", pattern[pos], successState);
@@ -336,6 +306,39 @@ namespace TernaryTree
                 }
             }
             return ++pos;
+        }
+
+        private int _handleOctal(int pos, string pattern, int successState)
+        {
+            string octal = default(string);
+            if ((pos <= pattern.Length - 3) &&
+                (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7') &&
+                (pattern[pos + 2] >= '0' && pattern[pos + 2] <= '7'))
+            {
+                octal = pattern.Substring(pos, 3);
+            }
+            else if ((pos <= pattern.Length - 2) &&
+                (pattern[pos + 1] >= '0' && pattern[pos + 1] <= '7'))
+            {
+                octal = pattern.Substring(pos, 2);
+            }
+            else
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+            try
+            {
+                int charInt = Convert.ToInt32(octal, 8);
+                char c = Convert.ToChar(charInt);
+                _transitions[_state].Add(new Transition(_matchExact(c, successState)));
+                _lastSymbol = $"\\{octal}";
+                pos += octal.Length - 1;
+            }
+            catch (FormatException)
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+            return pos;
         }
 
         private void _specialCharExactMatch(string lastSymbol, char special, int successState)
@@ -350,6 +353,7 @@ namespace TernaryTree
             {
                 _throwSyntaxError(pos, pattern);
             }
+            _lastSymbol = pattern.Substring(pos - 2, len + 2);
             try
             {
                 string hexString = pattern.Substring(pos, len);
@@ -375,21 +379,70 @@ namespace TernaryTree
                 _throwSyntaxError(pos, pattern);
             }
             _lastSymbol = pattern.Substring(startPos, pos - startPos + 1);
-            _transitions[_state].Add(new Transition(_matchUnicodeNamedBlock(_lastSymbol, successState)));
+            _transitions[_state].Add(new Transition(_matchWithSystemRegex(_lastSymbol, successState)));
             return pos;
         }
 
         private void _escapeDd(int pos, string pattern, int successState)
         {
             _lastSymbol = (pattern[pos] == 'd') ? "\\d" : "\\D";
-            List<UnicodeCategory> matchingCategories = new List<UnicodeCategory>
-                        {
-                            UnicodeCategory.DecimalDigitNumber
-                        };
-            Transition t = (pattern[pos] == 'd') ?
-                new Transition(_matchUnicodeCategory(matchingCategories, successState)) :
-                new Transition(_matchAnythingButUnicodeCategory(matchingCategories, successState));
-            _transitions[_state].Add(t);
+            _transitions[_state].Add(new Transition(_matchWithSystemRegex(_lastSymbol, successState)));
+        }
+
+        private void _escapeWw(int pos, string pattern, int successState)
+        {
+            _lastSymbol = (pattern[pos] == 'w') ? "\\w" : "\\W";
+            _transitions[_state].Add(new Transition(_matchWithSystemRegex(_lastSymbol, successState)));
+        }
+
+        private void _escapeSs(int pos, string pattern, int successState)
+        {
+            _lastSymbol = (pattern[pos] == 's') ? "\\s" : "\\S";
+            _transitions[_state].Add(new Transition(_matchWithSystemRegex(_lastSymbol, successState)));
+        }
+
+        private void _asciiControl(int pos, string pattern, int successState)
+        {
+            if (pos == pattern.Length - 1)
+            {
+                _throwSyntaxError(pos, pattern);
+            }
+            string charString = pattern.Substring(pos + 1, 1);
+            charString = charString.ToLower();
+            char c = Convert.ToChar(charString);
+            char cAdjusted = default(char);
+            switch (c)
+            {
+                case '[':
+                    cAdjusted = (char)27;
+                    break;
+                case '\\':
+                    cAdjusted = (char)28;
+                    break;
+                case ']':
+                    cAdjusted = (char)29;
+                    break;
+                case '^':
+                    cAdjusted = (char)30;
+                    break;
+                case '_':
+                    cAdjusted = (char)31;
+                    break;
+                default:
+                    int cInt = c;
+                    cInt -= 60;
+                    try
+                    {
+                        cAdjusted = (char)cInt;
+                    }
+                    catch (OverflowException)
+                    {
+                        _throwSyntaxError(pos, pattern);
+                    }
+                    break;
+            }
+            _lastSymbol = pattern.Substring(pos - 1, 3);
+            _transitions[_state].Add(new Transition(_matchExact(cAdjusted, successState)));
         }
 
         // TODO: Should _state actually just be a parameter of this method instead of a field?
@@ -564,37 +617,10 @@ namespace TernaryTree
             }
         };
 
-        private Func<Node<V>, string, int> _matchUnicodeCategory(
-            ICollection<UnicodeCategory> matchingCategories, int successState) => (node, key) =>
-            {
-                foreach (UnicodeCategory matchingCategory in matchingCategories)
-                {
-                    if (CharUnicodeInfo.GetUnicodeCategory(node.Value) == matchingCategory)
-                    {
-                        return successState;
-                    }
-                }
-                return -1;
-            };
-
-        private Func<Node<V>, string, int> _matchAnythingButUnicodeCategory(
-            ICollection<UnicodeCategory> nonMatchingCategories, int successState) => (node, key) =>
-            {
-                foreach (UnicodeCategory nonMatchingCategory in nonMatchingCategories)
-                {
-                    if (CharUnicodeInfo.GetUnicodeCategory(node.Value) == nonMatchingCategory)
-                    {
-                        return -1;
-                    }
-                }
-                return successState;
-            };
-
-        private Func<Node<V>, string, int> _matchUnicodeNamedBlock(string pattern, int successState) => (node, key) =>
+        // Cop out? Maybe, but the the groundwork to do all the special character matching without 
+        // System.RegularExpressions seems to go beyond the scope of this project.
+        private Func<Node<V>, string, int> _matchWithSystemRegex(string pattern, int successState) => (node, key) =>
         {
-            // TODO: Is there another way to handle this? Don't really want to bring in System.Text.RegularExpression
-            // I mean, why write all this other custom code when we could do every comparison as a character-by-character Regex.IsMatch?
-            // TODO: Does this need a try / catch?
             if (Regex.IsMatch(node.Value.ToString(), pattern))
             {
                 return successState;
