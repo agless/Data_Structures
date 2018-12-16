@@ -221,6 +221,7 @@ namespace TernaryTree
             }
             else
             {
+                // TODO: Would it be better to stack matchExacts instead of this foreach-based method?
                 _transitions[_state].Add(new Transition(_matchAnyOf(matchingChars, successState)));
             }
 
