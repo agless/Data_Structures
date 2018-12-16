@@ -298,8 +298,8 @@ namespace TernaryTree
         /// <returns></returns>
         public bool Contains(KeyValuePair<string, V> item)
         {
+            // TODO: This has to also chek that values are equal.  How do we compare V for equality?
             return Contains(item.Key);
-
         }
 
         /// <summary>
