@@ -13,6 +13,11 @@ namespace TernaryTree
         private string _lastSymbol;  // TODO: Get rid of this field.  We're always setting it, but it's only used once.  Figure it out inside the method.  (Walk backwards.)
         private List<string> _matches;
 
+        // TODO: Make delegates for initial and final states.  
+        // These should accept anything, repeating.
+        // Init should also move forward when first pattern char is matched.
+        // Final should also check for valid keys / do a prefix match.
+        
         #region Constructor and Public Method
 
         /// <summary>
@@ -26,8 +31,6 @@ namespace TernaryTree
                 throw new ArgumentNullException(nameof(pattern));
             }
             _transitions = new List<List<Transition>>();
-            pattern = (pattern.Substring(0, 2) == ".*") ? pattern : ".*" + pattern;
-            pattern = (pattern.Substring(pattern.Length - 2, 2) == ".*") ? pattern : pattern + ".*";
             _buildState(0, pattern);
             _matches = new List<string>();
             _state = 0;
