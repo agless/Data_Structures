@@ -13,6 +13,11 @@ namespace TernaryTree
         private string _lastSymbol;  // TODO: Get rid of this field.  We're always setting it, but it's only used once.  Figure it out inside the method.  (Walk backwards.)
         private List<string> _matches;
 
+        // TODO: Make delegates for initial and final states.  
+        // These should accept anything, repeating.
+        // Init should also move forward when first pattern char is matched.
+        // Final should also check for valid keys / do a prefix match.
+        
         #region Constructor and Public Method
 
         /// <summary>
@@ -46,13 +51,6 @@ namespace TernaryTree
         #endregion
 
         #region Private Methods
-
-        private TernaryTreeSearch(ref List<List<Transition>> transitions, ref List<string> matches, int state)
-        {
-            _transitions = transitions;
-            _state = state;
-            _matches = matches;
-        }
 
         // TODO: Refactor state building out to a seperate class.
         private void _buildState(int pos, string pattern)
@@ -226,6 +224,7 @@ namespace TernaryTree
             }
             else
             {
+                // TODO: Would it be better to stack matchExacts instead of this foreach-based method?
                 _transitions[_state].Add(new Transition(_matchAnyOf(matchingChars, successState)));
             }
 
@@ -453,13 +452,12 @@ namespace TernaryTree
             {
                 return;
             }
+            int oldState = _state;
             if (node.Smaller != null)
             {
-                // TODO: Why construct a new object here?  Why not just go down the branch recursively and restore oldState after?
-                TernaryTreeSearch<V> tts = new TernaryTreeSearch<V>(ref _transitions, ref _matches, _state);
-                tts._getBranchMatches(node.Smaller, key);
+                _getBranchMatches(node.Smaller, key);
+                _state = oldState;
             }
-            int oldState = _state;
             string newKey = key + node.Value;
             foreach (Transition transition in _transitions[_state])
             {

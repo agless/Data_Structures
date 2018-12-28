@@ -298,8 +298,8 @@ namespace TernaryTree
         /// <returns></returns>
         public bool Contains(KeyValuePair<string, V> item)
         {
+            // TODO: This has to also chek that values are equal.  How do we compare V for equality?
             return Contains(item.Key);
-
         }
 
         /// <summary>
@@ -324,7 +324,7 @@ namespace TernaryTree
             {
                 throw new IndexOutOfRangeException();
             }
-            // ICollection API docs want me to do a check for multidimensional array.
+            // TODO: ICollection API docs want me to do a check for multidimensional array.
             // How do I check for multidimensional array?
             // Is it even possible to call this with a multidimensional array?
             // Seems like it wouldn't compile, given the above signature. (Test this.)
