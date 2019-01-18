@@ -483,25 +483,13 @@ namespace TernaryTree
                 {
                     return node;
                 }
-                else if (node.Equal != null)
-                {
-                    return _getFinalNode(key, ++pos, node.Equal);
-                }
-                else return null;
+                return (node.Equal != null) ? _getFinalNode(key, ++pos, node.Equal) : null;
             }
             else if (keyChar < node.Value)
             {
-                if (node.Smaller != null)
-                {
-                    return _getFinalNode(key, pos, node.Smaller);
-                }
-                else return null;
+                return (node.Smaller != null) ? _getFinalNode(key, pos, node.Smaller) : null;
             }
-            else if (node.Bigger != null)
-            {
-                return _getFinalNode(key, pos, node.Bigger);
-            }
-            else return null;
+            else return (node.Bigger != null) ? _getFinalNode(key, pos, node.Bigger) : null;
         }
 
         /// <summary>

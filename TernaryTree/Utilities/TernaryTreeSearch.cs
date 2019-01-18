@@ -31,7 +31,10 @@ namespace TernaryTree
                 throw new ArgumentNullException(nameof(pattern));
             }
             _transitions = new List<List<Transition>>();
-            _buildState(0, pattern);
+            int pos = _buildInitialState(pattern);
+            _buildInteriorState(pos, pattern);
+            _decorateFinalInteriorState(_transitions.Count);
+            _buildFinalState(pattern);
             _matches = new List<string>();
             _state = 0;
         }
@@ -53,7 +56,30 @@ namespace TernaryTree
         #region Private Methods
 
         // TODO: Refactor state building out to a seperate class.
-        private void _buildState(int pos, string pattern)
+
+        private int _buildInitialState(string pattern)
+        {
+            if (pattern[0] == '^')
+            {
+                return 1;
+            }
+            if (pattern[0] == '\\' && pattern.Length >= 2 && pattern[1] == 'A')
+            {
+                return 2;
+            }
+            _transitions.Add(new List<Transition>());
+            _transitions[0].Add(new Transition(_matchEverything(0)));
+            if (pattern[0] == '.' && pattern.Length >= 2 && pattern[1] == '*')
+            {
+                return 2;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        private void _buildInteriorState(int pos, string pattern)
         {
             while (pos < pattern.Length)
             {
@@ -63,6 +89,34 @@ namespace TernaryTree
                 }
                 pos = _switchNextSymbol(pos, pattern, _transitions.Count);
                 _state++;
+            }
+        }
+
+        private void _decorateFinalInteriorState(int len)
+        {
+            for (int i = 0; i < _transitions[len - 1].Count; i++)
+            {
+                _transitions[len - 1][i] = new Transition(
+                    _checkValidKeyDecorator(_transitions[len - 1][i]));
+            }
+        }
+
+        private void _buildFinalState(string pattern)
+        {
+            // add prefix match decorator here only if it wasn't already expressed in the pattern
+            if (pattern.Length >= 2 && pattern[pattern.Length - 2] == '.' && pattern[pattern.Length - 1] == '*')
+            {
+                return;
+            }
+            else
+            {
+                while (_transitions.Count <= _state)
+                {
+                    _transitions.Add(new List<Transition>());
+                }
+                Transition interior = new Transition(_matchEverything(_transitions.Count));
+                Transition withDecorator = new Transition(_prefixMatchDecorator(interior));
+                _transitions[_state].Add(withDecorator);
             }
         }
 
@@ -78,7 +132,7 @@ namespace TernaryTree
                 case '\\':
                     pos = _handleEscape(pos, pattern, successState);
                     break;
-                //case '^':
+                //case '^':  // handled with new _buildIntialState method?
                 //case '$':
                 //case '|':
                 //case '?':
@@ -153,7 +207,7 @@ namespace TernaryTree
             // TODO: Can we add the loop state with a decorator instead?
             // Could have loop plus advance and loop without advance decorators.
 
-            // The previous transition should loop back to it's own state
+            // The previous transition should loop back to its own state
             _state--;
             _switchNextSymbol(0, _lastSymbol, _state);
             if (pos + 1 < pattern.Length)
@@ -186,6 +240,7 @@ namespace TernaryTree
 
             while (pos < pattern.Length && pattern[pos] != ']')
             {
+                // TODO: Deal with escapes? Special characters? Refactor switchNextSymbol?
                 if (pattern[pos] == '-')
                 {
                     isRangeQuery = true;
@@ -615,7 +670,7 @@ namespace TernaryTree
             }
         };
 
-        // Cop out? Maybe, but the the groundwork to do all the special character matching without 
+        // Cop out? Maybe, but the groundwork to do all the special character matching without 
         // System.RegularExpressions seems to go beyond the scope of this project.
         private Func<Node<V>, string, int> _matchWithSystemRegex(string pattern, int successState) => (node, key) =>
         {
