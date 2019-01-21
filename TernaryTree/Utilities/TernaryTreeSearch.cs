@@ -117,7 +117,7 @@ namespace TernaryTree
         {
             if ((pos == 0) || (pos > 1 && pattern[pos - 1] == '*' && pattern[pos - 2] != '\\'))
             {
-                _throwSyntaxError(pos, pattern);
+                throw _syntaxError(pos, pattern);
             }
             
             // If the last symbol is repeating, add an appropriate decorator to all transitions out of the preceding state.
@@ -170,7 +170,7 @@ namespace TernaryTree
         {
             if (pos == pattern.Length - 1)
             {
-                _throwSyntaxError(pos, pattern);
+                throw _syntaxError(pos, pattern);
             }
 
             int startPos = pos;
@@ -201,7 +201,7 @@ namespace TernaryTree
             if ((pos == pattern.Length && pattern[pos - 1] != ']') ||
                 (isRangeQuery && matchingChars.Count > 2))
             {
-                _throwSyntaxError(pos, pattern);
+                throw _syntaxError(pos, pattern);
             }
 
             if (isNegativeQuery && isRangeQuery)
@@ -236,7 +236,7 @@ namespace TernaryTree
         {
             if (pos == pattern.Length - 1)
             {
-                _throwSyntaxError(pos, pattern);
+                throw _syntaxError(pos, pattern);
             }
             if (pattern[++pos] >= '0' && pattern[pos] <= '7')
             {
@@ -323,7 +323,7 @@ namespace TernaryTree
             }
             else
             {
-                _throwSyntaxError(pos, pattern);
+                throw _syntaxError(pos, pattern);
             }
             try
             {
@@ -335,7 +335,7 @@ namespace TernaryTree
             }
             catch (FormatException)
             {
-                _throwSyntaxError(pos, pattern);
+                throw _syntaxError(pos, pattern);
             }
             return pos;
         }
@@ -350,7 +350,7 @@ namespace TernaryTree
         {
             if (++pos > pattern.Length - len)
             {
-                _throwSyntaxError(pos, pattern);
+                throw _syntaxError(pos, pattern);
             }
             _lastSymbol = pattern.Substring(pos - 2, len + 2);
             try
@@ -362,7 +362,7 @@ namespace TernaryTree
             }
             catch (FormatException)
             {
-                _throwSyntaxError(pos, pattern);
+                throw _syntaxError(pos, pattern);
             }
         }
 
@@ -375,7 +375,7 @@ namespace TernaryTree
             }
             if (pattern[pos] != '}')
             {
-                _throwSyntaxError(pos, pattern);
+                throw _syntaxError(pos, pattern);
             }
             _lastSymbol = pattern.Substring(startPos, pos - startPos + 1);
             _transitions[_state].Add(new Transition(_matchWithSystemRegex(_lastSymbol, successState)));
@@ -404,7 +404,7 @@ namespace TernaryTree
         {
             if (pos == pattern.Length - 1)
             {
-                _throwSyntaxError(pos, pattern);
+                throw _syntaxError(pos, pattern);
             }
             string charString = pattern.Substring(pos + 1, 1);
             charString = charString.ToLower();
@@ -436,7 +436,7 @@ namespace TernaryTree
                     }
                     catch (OverflowException)
                     {
-                        _throwSyntaxError(pos, pattern);
+                        throw _syntaxError(pos, pattern);
                     }
                     break;
             }
@@ -502,7 +502,7 @@ namespace TernaryTree
             }
         }
 
-        private void _throwSyntaxError(int pos, string pattern)
+        private ArgumentException _syntaxError(int pos, string pattern)
         {
             StringBuilder message = new StringBuilder("Invalid pattern near:");
             message.Append(Environment.NewLine);
@@ -513,7 +513,7 @@ namespace TernaryTree
                 message.Append(' ', pos - 1);
             }
             message.Append('^');
-            throw new ArgumentException(message.ToString());
+            return new ArgumentException(message.ToString());
         }
 
         #endregion
