@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using TernaryTree;
 
@@ -9,21 +10,44 @@ namespace TernaryTreeTest
     {
         public void Regex_Match_Test(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
-            foreach (string nonMatchingKey in nonMatchingKeys)
+            // Test the test
+            List<string> keys = new List<string>(matchingKeys);
+            keys.AddRange(nonMatchingKeys);
+            List<string> actualResult = new List<string>();
+            foreach(string key in keys)
             {
-                subject.Add(nonMatchingKey);
+                if (Regex.IsMatch(key, pattern))
+                {
+                    actualResult.Add(key);
+                }
             }
-            HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
-            Assert.Multiple(() =>
+
+            Assert.Multiple(() => 
             {
-                Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
+                Assert.That(keys.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
                 Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
                 foreach (string key in matchingKeys)
                 {
                     Assert.That(actualResult.Contains(key));
                 }
             });
+
+            // Test my code.
+            //TernaryTree<int> subject = TernaryTree<int>.Create(matchingKeys);
+            //foreach (string nonMatchingKey in nonMatchingKeys)
+            //{
+            //    subject.Add(nonMatchingKey);
+            //}
+            //HashSet<string> actualResult = new HashSet<string>(subject.Match(pattern));
+            //Assert.Multiple(() =>
+            //{
+            //    Assert.That(subject.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
+            //    Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
+            //    foreach (string key in matchingKeys)
+            //    {
+            //        Assert.That(actualResult.Contains(key));
+            //    }
+            //});
         }
 
         [TestCase("zero", new string[] { "zero" }, new string[] { "one", "two", "three", "four" })]
