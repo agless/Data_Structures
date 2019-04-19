@@ -61,27 +61,27 @@ namespace TernaryTreeTest
         }
 
         [TestCase(".ero", new string[] { "zero", "hero", "nero" }, new string[] { "none", "of", "these" })]
-        [TestCase("o.e", new string[] { "one", "ole", "owe" }, new string[] { "own", "nose", "oreo" })]
-        [TestCase(".w.", new string[] { "two", "ewe", "awe" }, new string[] { "tweed", "goo", "swoop" })]
+        [TestCase("o.e", new string[] { "one", "ole", "owe" }, new string[] { "own", "owwe", "owwwwwwwwwwwwwwe" })]
+        [TestCase(".w.", new string[] { "two", "ewe", "awe" }, new string[] { "goo", "look, your shoe!", "nah, fam" })]
         [TestCase("t...e", new string[] { "three", "twice", "trove" }, new string[] { "I", "don't", "know" })]
-        [TestCase("f...", new string[] { "four", "foot", "flip" }, new string[] { "flashy", "freaking", "fools" })]
+        [TestCase("f...", new string[] { "four", "foot", "flip" }, new string[] { "please", "no", "more", "tests" })]
         public void Wildcard_Match(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase("ab*a", new string[] { "abbbbbba", "aba", "aa" }, new string[] { "abca", "ab", "ba" })]
-        [TestCase("a*b", new string[] { "aaaaaaaab", "ab", "b" }, new string[] { "acb", "cab", "ba"})]
-        [TestCase("ab*", new string[] { "abbbbbbbb", "ab", "a" }, new string[] { "b", "acb", "ba", "abc" })]
-        [TestCase("ab*c", new string[] { "abbbbbbbbc", "abc", "ac" }, new string[] { "acb", "cab", "bca" })]
+        [TestCase("a*b", new string[] { "aaaaaaaab", "ab", "b" }, new string[] { "acc", "awkward", "almost gotcha"})]
+        [TestCase("ab*", new string[] { "abbbbbbbb", "ab", "a" }, new string[] { "b", "not one in here", "bbbbbbbut" })]
+        [TestCase("ab*c", new string[] { "abbbbbbbbc", "abc", "ac" }, new string[] { "ca", "cab", "bca" })]
         public void Repeating_Literal(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase("a.*a", new string[] { "aa", "aba", "abca", "abbbcbcbccccbba" }, new string[] { "a", "ab", "ba", "abc" })]
-        [TestCase(".*a", new string[] { "a", "ba", "bcbcccbcbcbbcbcbbbbcbcbcba" }, new string[] { "b", "ab", "cab" })]
-        [TestCase("a.*", new string[] { "a", "ab", "abcbccbcbccbbbcbc" }, new string[] { "b", "ba", "baaaa" })]
+        [TestCase(".*a", new string[] { "a", "ba", "bcbcccbcbcbbcbcbbbbcbcbcba" }, new string[] { "b", "ddbb", "ccccdgefid" })]
+        [TestCase("a.*", new string[] { "a", "ab", "abcbccbcbccbbbcbc" }, new string[] { "b", "dddbbb", "pretty stringy" })]
         public void Repeating_Dot(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
             Regex_Match_Test(pattern, matchingKeys, nonMatchingKeys);
