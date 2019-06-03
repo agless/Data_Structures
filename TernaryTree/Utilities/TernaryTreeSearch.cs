@@ -94,7 +94,8 @@ namespace TernaryTree
 
         private void _decorateFinalInteriorState(int len)
         {
-            for (int i = 0; i < _transitions[len - 1].Count; i++)
+            int i = (_transitions.Count > 1) ? 0 : 1;
+            for ( ; i < _transitions[len - 1].Count; i++)
             {
                 _transitions[len - 1][i] = new Transition(
                     _checkValidKeyDecorator(_transitions[len - 1][i]));
