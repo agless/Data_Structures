@@ -19,7 +19,7 @@ namespace TernaryTree
         IDictionary<string, V>,
         ICollection<KeyValuePair<string, V>>,
         IEnumerable<KeyValuePair<string, V>>,
-        IEnumerable
+        IEnumerable // TODO:  We're not doing this right.  It's supposed to be an enumeration of the <V>, not the string.
         // TODO: Non-Generic Interfaces?
     {
         #region Fields and Properties

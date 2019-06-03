@@ -22,7 +22,7 @@ namespace TernaryTree
         /// <summary>
         /// Returns the current key.
         /// </summary>
-        object IEnumerator.Current => _currentKey;
+        object IEnumerator.Current => _currentKey; // TODO:  We're not doing this right.  It's supposed to be an enumeration of the values, not the keys.
 
         /// <summary>
         /// Returns a <see cref="KeyValuePair{TKey, TValue}"/> with the current key and value.

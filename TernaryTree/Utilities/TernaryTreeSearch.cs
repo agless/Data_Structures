@@ -52,7 +52,7 @@ namespace TernaryTree
 
         #region Private Methods
 
-        // TODO: Refactor state building out to a seperate class.
+        // TODO: Refactor state machine building out to a seperate class.
         private void _buildState(int pos, string pattern)
         {
             while (pos < pattern.Length)
