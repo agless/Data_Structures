@@ -22,15 +22,12 @@ namespace TernaryTreeTest
                 }
             }
 
-            Assert.Multiple(() =>
+            Assume.That(keys.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
+            Assume.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
+            foreach (string key in matchingKeys)
             {
-                Assert.That(keys.Count, Is.EqualTo(matchingKeys.Length + nonMatchingKeys.Length));
-                Assert.That(actualResult.Count, Is.EqualTo(matchingKeys.Length));
-                foreach (string key in matchingKeys)
-                {
-                    Assert.That(actualResult.Contains(key));
-                }
-            });
+                Assume.That(actualResult.Contains(key));
+            }
         }
 
         public void Test_Ternary_Tree(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
