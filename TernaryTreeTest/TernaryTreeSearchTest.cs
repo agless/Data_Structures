@@ -8,9 +8,10 @@ namespace TernaryTreeTest
 {
     class TernaryTreeSearchTest
     {
-        public void Test_The_Test_Case(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
+        public void Validate_Test_Case(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            // Test the test - if these fail, then the test case doesn't reflect system regex behavior.
+            // If these assumptions fail, then the test case doesn't reflect system regex behavior 
+            // and the test is ignored.
             List<string> keys = new List<string>(matchingKeys);
             keys.AddRange(nonMatchingKeys);
             List<string> actualResult = new List<string>();
@@ -57,7 +58,7 @@ namespace TernaryTreeTest
         [TestCase("four", new string[] { "four" }, new string[] { "zero", "one", "two", "three" })]
         public void Exact_Match(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -68,7 +69,7 @@ namespace TernaryTreeTest
         [TestCase("f...", new string[] { "four", "foot", "flip" }, new string[] { "please", "no", "more", "tests" })]
         public void Wildcard_Match(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -78,7 +79,7 @@ namespace TernaryTreeTest
         [TestCase("ab*c", new string[] { "abbbbbbbbc", "abc", "ac" }, new string[] { "ca", "cab", "bca" })]
         public void Repeating_Literal(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -87,14 +88,14 @@ namespace TernaryTreeTest
         [TestCase("a.*", new string[] { "a", "ab", "abcbccbcbccbbbcbc" }, new string[] { "b", "dddbbb", "pretty stringy" })]
         public void Repeating_Dot(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase("th.*", new string[] { "this", "these", "those" }, new string[] { "not", "in", "here" })]
         public void Prefix_Exact(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -103,7 +104,7 @@ namespace TernaryTreeTest
         [TestCase(".*first.*second.*third.*", new string[] { "xxx_first_xxx_second_xxx_third_xxx", "firstsecondthird", "first; second; third" }, new string[] { "third", "this ain't it", "first" })]
         public void Contains_Exact(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -111,7 +112,7 @@ namespace TernaryTreeTest
         [TestCase("[A-Z][0-9]", new string[] { "A0", "B1", "C2", "D3", "E4" }, new string[] { "9A", "BB", "AC", "6D", "a1" })]
         public void Range(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -119,7 +120,7 @@ namespace TernaryTreeTest
         [TestCase("[^a-z]", new string[] { "0", "1", "2", "3", "4" }, new string[] { "a", "b", "c", "d", "e" })]
         public void Any_But_Range(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -128,14 +129,14 @@ namespace TernaryTreeTest
         [TestCase("[Ll1][Ee3][Ee3][Tt7]", new string[] { "1337", "leet", "LEET", "13eT" }, new string[] { "Elite", "lite", "leat", "light" })]
         public void Character_Group(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
         [TestCase("[^Aa]", new string[] { "B", "b" }, new string[] { "A", "a" })]
         public void Any_But_Group(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -143,7 +144,7 @@ namespace TernaryTreeTest
         [TestCase(@"\d\d\d", new string[] { "123", "911", "000" }, new string[] { "abc", "14A", "AAA" })]
         public void Escape_d(string pattern, string[] matchingKeys, string [] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -151,7 +152,7 @@ namespace TernaryTreeTest
         [TestCase(@"\D\D\D", new string[] { "___", "   ", "\r\nA" }, new string[] { "123", "456", "789" })]
         public void Escape_D(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -159,7 +160,7 @@ namespace TernaryTreeTest
         [TestCase(@"\x77\x6F\x72\x6B\x69\x6E\x67", new string[] { "working" }, new string[] { "not" })]
         public void Escape_x(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -167,7 +168,7 @@ namespace TernaryTreeTest
         [TestCase(@"\u0077\u006F\u0072\u006B\u0069\u006E\u0067", new string[] { "working" }, new string[] { "not" })]
         public void Escape_u(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -175,7 +176,7 @@ namespace TernaryTreeTest
         [TestCase(@"\10", new string[] { "\b" }, new string[] { "a", "b", "c" })]
         public void Escape_nnn_octal(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -183,7 +184,7 @@ namespace TernaryTreeTest
         [TestCase(@"\p{IsBasicLatin}\p{IsBasicLatin}\p{IsBasicLatin}", new string[] { "ABC", "abc", "XYZ", "xyz" }, new string[] { "\u2190", "\u2191", "\u2192" })]
         public void Escape_p(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -191,7 +192,7 @@ namespace TernaryTreeTest
         [TestCase(@"\P{IsBasicLatin}\P{IsBasicLatin}\P{IsBasicLatin}", new string[] { "\u2190\u2191\u2192" }, new string[] { "ABC", "abc", "XYZ", "xyz" })]
         public void Escape_P(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -199,7 +200,7 @@ namespace TernaryTreeTest
         [TestCase(@"\s\s\s", new string[] { "   ", "\u2009  "}, new string[] { "abc", "123", "ABC" })]
         public void Escape_s(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -207,7 +208,7 @@ namespace TernaryTreeTest
         [TestCase(@"\S\S\S", new string[] { "abc", "123", "ABC" }, new string[] { "   ", "\u2009  " })]
         public void Escape_S(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -215,7 +216,7 @@ namespace TernaryTreeTest
         [TestCase(@"\w\w\w", new string[] { "abc", "123", "ABC" }, new string[] { "   ", "\u2009  " })]
         public void Escape_w(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
@@ -223,7 +224,7 @@ namespace TernaryTreeTest
         [TestCase(@"\W\W\W", new string[] { "   ", "\u200B\u200B\u200B", "\u2009  " }, new string[] { "abc", "123", "ABC" })]
         public void Escape_W(string pattern, string[] matchingKeys, string[] nonMatchingKeys)
         {
-            Test_The_Test_Case(pattern, matchingKeys, nonMatchingKeys);
+            Validate_Test_Case(pattern, matchingKeys, nonMatchingKeys);
             Test_Ternary_Tree(pattern, matchingKeys, nonMatchingKeys);
         }
 
